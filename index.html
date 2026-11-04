@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>견적 정확도 체크</title>
+<meta name="description" content="프리랜서를 위한 견적 정확도 체크. 예상 시간과 실제 시간의 차이를 분석하고 다음 견적에 반영할 가산율을 제안합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<header class="hero">
+  <div class="orb o1" aria-hidden="true"></div><div class="orb o2" aria-hidden="true"></div><div class="orb o3" aria-hidden="true"></div>
+  <div class="wrap hero-inner">
+    <div class="topbar">
+      <span class="brand">견적 정확도 체크</span>
+      <button id="themeBtn" class="btn ghost" type="button" aria-label="테마 전환">테마 전환</button>
+    </div>
+    <h1>내 견적, 현실과 얼마나 다를까?</h1>
+    <p class="lead">예상 시간과 실제 시간의 차이를 추적하고, 다음 견적에 얼마나 더해야 할지 데이터로 확인하세요.</p>
+    <div class="hero-actions">
+      <button id="addBtn" class="btn primary" type="button">+ 프로젝트 추가</button>
+      <button id="demoBtn" class="btn glass" type="button">예시 데이터 불러오기</button>
+    </div>
+  </div>
+</header>
+<main id="main" class="wrap">
+  <section aria-labelledby="h-dash">
+    <h2 id="h-dash">대시보드</h2>
+    <div class="grid stats" id="stats"></div>
+  </section>
+  <section class="card suggest" id="suggestCard" aria-live="polite"></section>
+  <div class="two">
+    <section class="card" aria-labelledby="h-cat">
+      <h2 id="h-cat">카테고리별 평균 초과율</h2>
+      <div id="bars" class="bars"></div>
+    </section>
+    <section class="card" aria-labelledby="h-trend">
+      <h2 id="h-trend">예상 vs 실제 시간 추이</h2>
+      <div id="trend" class="trend"></div>
+    </section>
+  </div>
+  <section class="card" aria-labelledby="h-list">
+    <div class="list-head">
+      <h2 id="h-list">프로젝트 기록</h2>
+      <button id="clearBtn" class="btn danger" type="button">전체 삭제</button>
+    </div>
+    <div id="list" class="list"></div>
+  </section>
+  <footer class="foot">데이터는 이 브라우저에만 저장됩니다.</footer>
+</main>
+
+<div id="modal" class="modal" hidden>
+  <div class="backdrop" data-close></div>
+  <form id="form" class="sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="formTitle" novalidate>
+    <h2 id="formTitle">프로젝트 추가</h2>
+    <label>프로젝트 이름<input name="name" type="text" maxlength="60" autocomplete="off"><small class="err" data-err="name"></small></label>
+    <label>카테고리<select name="category"></select><small class="err" data-err="category"></small></label>
+    <label>견적 금액 (원)<input name="quotedPrice" type="number" inputmode="numeric" min="1" step="1"><small class="err" data-err="quotedPrice"></small></label>
+    <div class="row2">
+      <label>예상 시간 (h)<input name="estimatedHours" type="number" inputmode="decimal" min="0" step="0.5"><small class="err" data-err="estimatedHours"></small></label>
+      <label>실제 시간 (h)<input name="actualHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="진행 중이면 비움"><small class="err" data-err="actualHours"></small></label>
+    </div>
+    <label>날짜<input name="date" type="date"><small class="err" data-err="date"></small></label>
+    <div class="form-actions">
+      <button class="btn ghost" type="button" data-close>취소</button>
+      <button class="btn primary" type="submit">저장</button>
+    </div>
+  </form>
+</div>
+<div id="confirm" class="modal" hidden>
+  <div class="backdrop" data-cclose></div>
+  <div class="sheet glass-strong small" role="alertdialog" aria-modal="true" aria-labelledby="cTitle">
+    <h2 id="cTitle">전체 삭제</h2>
+    <p id="cMsg">모든 기록을 삭제할까요? 되돌릴 수 없습니다.</p>
+    <div class="form-actions">
+      <button class="btn ghost" type="button" data-cclose>취소</button>
+      <button id="cOk" class="btn danger solid" type="button">삭제</button>
+    </div>
+  </div>
+</div>
+<div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
