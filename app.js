@@ -692,6 +692,8 @@ function setRecordChanges(id, fn) {
 }
 function deleteChange(cid) {
   setRecordChanges(changesFor, (list) => list.filter((c) => c.id !== cid));
+  // The deleted button is gone and closeConfirm restored focus to it, so move focus inside the dialog.
+  fld(chForm, 'note').focus();
   toast('변경 요청을 삭제했어요.');
 }
 chForm.addEventListener('submit', (ev) => {

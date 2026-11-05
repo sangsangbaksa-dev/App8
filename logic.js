@@ -124,6 +124,11 @@ export function suggestion(records) {
   const category = pick ? pick.category : null;
   const avg = pick ? pick.avgOverrun : stats.avgOverrun;
   const label = category ? `${category} 카테고리는` : '전체 프로젝트는';
+  // Consistently finishing far under estimate is not "accurate"; say so instead of praising the quote.
+  if (avg < -HIT_TOLERANCE) {
+    return { kind: 'neutral', category, avgOverrun: avg, surcharge: 0,
+      message: `${label} 평균 ${fmtSigned(avg)}% — 예상보다 일찍 끝나는 편이에요. 견적 시간이 넉넉했을 수 있으니 단가나 기간 조건을 점검해 보세요.` };
+  }
   if (avg <= HIT_TOLERANCE) {
     return { kind: 'good', category, avgOverrun: avg, surcharge: 0,
       message: `${label} 평균 ${fmtSigned(avg)}% — 견적이 비교적 정확해요. 지금 방식을 유지하세요.` };
