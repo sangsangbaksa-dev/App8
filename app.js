@@ -7,6 +7,8 @@ import {
   roundHoursUp, hoursToDays, withSurcharge, hourlyRate,
   monthlyTotals, changeSummary, adjustedQuote, scopeCreepSummary, buildSummaryText,
   sanitizeRecord, sanitizeTemplate, sanitizeSettings, buildBackup, parseBackup,
+  AI_KEY_STORAGE, AI_MAX_ITEMS, isPlausibleKey, parseLineItems, buildReviewPrompt, buildAnthropicRequest,
+  extractText, parseReviewResponse, localReview, aiErrorMessage,
 } from './logic.js';
 
 const KEY = 'estimate-check:v1';
@@ -882,6 +884,117 @@ $('#themeBtn').addEventListener('click', () => {
 });
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', syncThemeBtn);
 
+// ---------- AI review (optional, uses the user's own key) ----------
+const AI_EXAMPLE = '로고 시안 3종 | 6 | 300000\n수정 2회 | 3\n납품 파일 정리 | 1\n첫 미팅 | 1';
+let aiBusy = false;
+function readAiKey() {
+  try { return (localStorage.getItem(AI_KEY_STORAGE) || '').trim(); } catch { return ''; }
+}
+function writeAiKey(v) {
+  try { localStorage.setItem(AI_KEY_STORAGE, v); return true; } catch { return false; }
+}
+function removeAiKey() {
+  try { localStorage.removeItem(AI_KEY_STORAGE); return true; } catch { return false; }
+}
+function syncAiMode() {
+  const on = !!readAiKey();
+  $('#aiMode').textContent = on ? 'AI 분석' : '기본 분석';
+  $('#aiKeyToggle').textContent = on ? 'API 키 관리' : 'API 키 설정';
+}
+function aiList(title, list, empty) {
+  const wrap = el('div', { class: 'ai-block' }, el('h3', { class: 'sub-h', text: title }));
+  if (!list.length) { wrap.append(el('p', { class: 'hint', text: empty })); return wrap; }
+  const ul = el('ul', { class: 'ai-list' });
+  for (const x of list) ul.append(el('li', {}, el('strong', { text: x.item }), el('span', { text: x.reason })));
+  wrap.append(ul);
+  return wrap;
+}
+// Everything here is set with textContent, so model output is never parsed as HTML.
+function renderAiOut(result, { source = 'local', note = '', busy = false } = {}) {
+  const out = $('#aiOut');
+  out.replaceChildren();
+  if (busy) { out.append(el('p', { class: 'hint', text: 'AI가 견적을 검토하고 있어요…' })); return; }
+  if (note) out.append(el('p', { class: 'tip warn', text: note }));
+  if (!result) {
+    if (!note) out.append(el('p', { class: 'hint', text: '항목을 입력하고 “분석하기”를 누르면 결과가 여기에 나와요.' }));
+    return;
+  }
+  out.append(el('p', { class: 'ai-sum', text: result.summary }));
+  out.append(aiList('위험 요소', result.risks, '눈에 띄는 위험 항목이 없어요.'));
+  out.append(aiList('빠진 항목 후보', result.missing, '빠진 항목 후보가 없어요.'));
+  if (result.hoursAdjustmentPct > 0) {
+    out.append(el('p', { class: 'tip good', text: `다음 견적에 시간 ${result.hoursAdjustmentPct}% 가산을 검토해 보세요.` }));
+  }
+  out.append(el('p', { class: 'hint', text: source === 'ai'
+    ? 'AI가 만든 검토예요. 참고용으로만 보고 최종 판단은 직접 해 주세요.'
+    : '키 없이 과거 기록과 규칙으로 계산한 기본 검토예요.' }));
+}
+async function runAiReview(e) {
+  e.preventDefault();
+  if (aiBusy) return;
+  const category = $('#aiCategory').value;
+  const { items, skipped } = parseLineItems($('#aiItems').value);
+  if (!items.length) {
+    renderAiOut(null, { note: '견적 항목을 한 줄 이상 입력해 주세요. 형식: 항목 | 예상 시간(h) | 금액(원, 선택)' });
+    return;
+  }
+  const skipNote = skipped ? ` (${AI_MAX_ITEMS}개를 넘는 ${skipped}줄은 제외했어요.)` : '';
+  const benchmark = categoryBreakdown(records).find((c) => c.category === category) || null;
+  const local = localReview({ items, category, records });
+  const key = readAiKey();
+  if (!key) {
+    renderAiOut(local, { note: `저장된 API 키가 없어 기본 검토를 보여드려요.${skipNote}` });
+    return;
+  }
+  aiBusy = true;
+  $('#aiRun').disabled = true;
+  renderAiOut(null, { busy: true });
+  let note = '';
+  try {
+    const { system, user } = buildReviewPrompt({ items, category, benchmark });
+    const req = buildAnthropicRequest({ apiKey: key, system, user });
+    const res = await fetch(req.url, req.init);
+    if (!res.ok) {
+      note = aiErrorMessage(res.status);
+    } else {
+      const body = await res.json();
+      const usable = body.stop_reason !== 'max_tokens' && body.stop_reason !== 'refusal';
+      const parsed = usable ? parseReviewResponse(extractText(body)) : null;
+      if (parsed) { renderAiOut(parsed, { source: 'ai', note: skipNote.trim() }); return; }
+      note = 'AI 응답을 해석하지 못했어요.';
+    }
+  } catch (err) {
+    note = err instanceof TypeError ? '네트워크 오류로 AI 분석을 하지 못했어요.' : 'AI 응답을 읽지 못했어요.';
+  } finally {
+    aiBusy = false;
+    $('#aiRun').disabled = false;
+  }
+  renderAiOut(local, { note: `${note} 기본 검토를 보여드려요.${skipNote}` });
+}
+$('#aiKeyToggle').addEventListener('click', () => {
+  const box = $('#aiKeyBox');
+  const open = box.hidden;
+  box.hidden = !open;
+  $('#aiKeyToggle').setAttribute('aria-expanded', String(open));
+  if (open) $('#aiKeyInput').focus();
+});
+$('#aiKeySave').addEventListener('click', () => {
+  const v = $('#aiKeyInput').value.trim();
+  if (!isPlausibleKey(v)) { toast('키 형식이 올바르지 않아요.'); return; }
+  if (!writeAiKey(v)) { toast('이 브라우저에 키를 저장할 수 없어요.'); return; }
+  $('#aiKeyInput').value = '';
+  syncAiMode();
+  toast('API 키를 이 브라우저에 저장했어요.');
+});
+$('#aiKeyClear').addEventListener('click', () => {
+  removeAiKey();
+  $('#aiKeyInput').value = '';
+  syncAiMode();
+  toast('API 키를 삭제했어요.');
+});
+$('#aiForm').addEventListener('submit', runAiReview);
+$('#aiExample').addEventListener('click', () => { $('#aiItems').value = AI_EXAMPLE; });
+
 // ---------- init ----------
 const savedTheme = getTheme();
 if (savedTheme === 'light' || savedTheme === 'dark') document.documentElement.dataset.theme = savedTheme;
@@ -889,6 +1002,9 @@ syncThemeBtn();
 for (const f of [form, tplForm]) {
   fld(f, 'category').append(...CATEGORIES.map((c) => el('option', { value: c, text: c })));
 }
+$('#aiCategory').append(...CATEGORIES.map((c) => el('option', { value: c, text: c })));
+syncAiMode();
+renderAiOut(null);
 {
   const raw = readJSON(KEY, []);
   // Malformed saved rows are dropped instead of crashing the charts.

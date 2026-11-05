@@ -89,6 +89,31 @@
     </section>
   </div>
 
+  <section class="card ai-card" aria-labelledby="h-ai">
+    <div class="section-head">
+      <h2 id="h-ai">AI 견적 검토 <span id="aiMode" class="badge">기본 분석</span></h2>
+      <button id="aiKeyToggle" class="btn ghost sm" type="button" aria-expanded="false" aria-controls="aiKeyBox">API 키 설정</button>
+    </div>
+    <p class="hint">견적 항목을 한 줄에 하나씩 적으면 위험한 항목과 빠진 항목을 찾아 드려요. 형식은 <code>항목 | 예상 시간(h) | 금액(원, 선택)</code>입니다. 고객 이름은 보내지 않아요.</p>
+    <div id="aiKeyBox" class="ai-key" hidden>
+      <label class="field">Anthropic API 키<input id="aiKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..."></label>
+      <p class="hint">키는 이 브라우저의 localStorage에만 저장되고, 분석할 때 api.anthropic.com으로만 전송돼요. 공용 컴퓨터에서는 저장하지 마세요. 키가 없으면 기본 검토를 보여 줘요.</p>
+      <div class="list-actions">
+        <button id="aiKeySave" class="btn primary sm" type="button">키 저장</button>
+        <button id="aiKeyClear" class="btn ghost sm" type="button">키 삭제</button>
+      </div>
+    </div>
+    <form id="aiForm" class="ai-form" autocomplete="off">
+      <label class="field">견적 카테고리<select id="aiCategory" name="category"></select></label>
+      <label class="field">견적 항목<textarea id="aiItems" name="items" rows="6" maxlength="3000" placeholder="로고 시안 3종 | 6 | 300000&#10;수정 2회 | 3&#10;납품 파일 정리 | 1"></textarea></label>
+      <div class="form-actions">
+        <button id="aiExample" class="btn ghost" type="button">예시 넣기</button>
+        <button id="aiRun" class="btn primary" type="submit">분석하기</button>
+      </div>
+    </form>
+    <div id="aiOut" class="ai-out" aria-live="polite"></div>
+  </section>
+
   <div class="two">
     <section class="card" aria-labelledby="h-tpl">
       <div class="section-head">

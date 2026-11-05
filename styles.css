@@ -299,3 +299,16 @@ input[type="search"]{-webkit-appearance:none;appearance:none}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
+
+/* AI review panel */
+.ai-key{margin:0 0 12px;padding:12px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface-2)}
+.ai-key .hint{margin-bottom:10px}
+textarea{display:block;width:100%;min-width:0;margin-top:5px;font:inherit;font-size:.95rem;color:var(--text);background:var(--input-bg);border:1px solid var(--line-strong);border-radius:var(--radius-sm);padding:9px 12px;min-height:120px;resize:vertical}
+textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,75,240,.2)}
+textarea::placeholder{color:var(--muted);opacity:.7}
+.ai-out{margin-top:12px}
+.ai-out .hint{margin:10px 0 0}
+.ai-sum{font-weight:600;margin:4px 0 6px}
+.ai-block{margin-top:12px}
+.ai-list{margin:6px 0 0;padding-left:18px;display:grid;gap:6px;font-size:.92rem}
+.ai-list strong{margin-right:4px}
