@@ -3,85 +3,219 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>견적 정확도 체크</title>
-<meta name="description" content="프리랜서를 위한 견적 정확도 체크. 예상 시간과 실제 시간의 차이를 분석하고 다음 견적에 반영할 가산율을 제안합니다.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<meta name="description" content="프리랜서를 위한 견적 정확도 체크. 예상 시간과 실제 시간의 차이를 고객별·카테고리별로 분석하고, 범위 변경과 월 목표까지 함께 관리합니다.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <a class="skip" href="#main">본문으로 건너뛰기</a>
+
+<div id="sticky" class="sticky" aria-hidden="true">
+  <div class="wrap sticky-in">
+    <span>프로젝트 <b id="stCount">-</b></span>
+    <span>적중률 <b id="stHit">-</b></span>
+    <span>평균 편차 <b id="stAvg">-</b></span>
+    <span>실질 시급 <b id="stRate">-</b></span>
+  </div>
+</div>
+
 <header class="hero">
   <div class="orb o1" aria-hidden="true"></div><div class="orb o2" aria-hidden="true"></div><div class="orb o3" aria-hidden="true"></div>
   <div class="wrap hero-inner">
     <div class="topbar">
       <span class="brand">견적 정확도 체크</span>
-      <button id="themeBtn" class="btn ghost" type="button" aria-label="테마 전환">테마 전환</button>
+      <button id="themeBtn" class="btn glass sm" type="button" aria-pressed="false">다크 모드</button>
     </div>
     <h1>내 견적, 현실과 얼마나 다를까?</h1>
-    <p class="lead">예상 시간과 실제 시간의 차이를 추적하고, 다음 견적에 얼마나 더해야 할지 데이터로 확인하세요.</p>
+    <p class="lead">예상 시간과 실제 시간의 차이를 추적하고, 고객과 카테고리별로 다음 견적에 얼마나 더해야 할지 확인하세요.</p>
     <div class="hero-actions">
       <button id="addBtn" class="btn primary" type="button">+ 프로젝트 추가</button>
       <button id="demoBtn" class="btn glass" type="button">예시 데이터 불러오기</button>
     </div>
   </div>
 </header>
+
 <main id="main" class="wrap">
   <section aria-labelledby="h-dash">
-    <h2 id="h-dash">대시보드</h2>
+    <div class="section-head">
+      <h2 id="h-dash">대시보드</h2>
+      <button id="copySummary" class="btn ghost sm" type="button">요약 복사</button>
+    </div>
     <div class="grid stats" id="stats"></div>
   </section>
+
   <section class="card suggest" id="suggestCard" aria-live="polite"></section>
+
   <div class="two">
     <section class="card" aria-labelledby="h-cat">
-      <h2 id="h-cat">카테고리별 평균 초과율</h2>
-      <div id="bars" class="bars"></div>
+      <h2 id="h-cat">카테고리별 평균 편차</h2>
+      <div id="catBars" class="bars"></div>
     </section>
+    <section class="card" aria-labelledby="h-client">
+      <h2 id="h-client">고객별 평균 편차</h2>
+      <div id="clientBars" class="bars"></div>
+    </section>
+  </div>
+
+  <div class="two">
     <section class="card" aria-labelledby="h-trend">
       <h2 id="h-trend">예상 vs 실제 시간 추이</h2>
       <div id="trend" class="trend"></div>
+      <h3 class="sub-h">프로젝트별 편차율</h3>
+      <div id="varChart" class="trend"></div>
+      <div class="chart-head">
+        <h3 class="sub-h">월별 견적 금액 · 목표선</h3>
+        <label class="field target-field">월 목표 (원)<input id="targetInput" type="number" inputmode="numeric" min="0" step="100000" placeholder="예: 3000000"></label>
+      </div>
+      <div id="monthChart" class="trend"></div>
+    </section>
+    <section class="card" aria-labelledby="h-unit">
+      <h2 id="h-unit">단위·반올림 도우미</h2>
+      <p class="hint">작업 시간을 청구 단위로 올리고, 일 단위와 시급을 바로 환산해요.</p>
+      <form id="unitForm" class="unit-form" autocomplete="off">
+        <label class="field">작업 시간 (h)<input name="hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="예: 7.2"></label>
+        <label class="field">청구 단위<select name="step">
+          <option value="0.5">0.5시간</option>
+          <option value="1" selected>1시간</option>
+          <option value="2">2시간</option>
+          <option value="4">4시간</option>
+        </select></label>
+        <label class="field">가산율 (%)<input name="pct" type="number" inputmode="decimal" min="0" step="5" value="10"></label>
+        <label class="field">견적 금액 (원, 선택)<input name="price" type="number" inputmode="numeric" min="0" step="1" placeholder="시급 환산용"></label>
+      </form>
+      <div id="unitOut" class="unit-out" aria-live="polite"></div>
     </section>
   </div>
+
+  <div class="two">
+    <section class="card" aria-labelledby="h-tpl">
+      <div class="section-head">
+        <h2 id="h-tpl">견적 템플릿</h2>
+        <button id="tplAddBtn" class="btn ghost sm" type="button">+ 템플릿</button>
+      </div>
+      <div id="tplList" class="tpl-list"></div>
+    </section>
+    <section class="card" aria-labelledby="h-scope">
+      <h2 id="h-scope">범위 변경 요약</h2>
+      <div id="scopeBox"></div>
+    </section>
+  </div>
+
   <section class="card" aria-labelledby="h-list">
     <div class="list-head">
-      <h2 id="h-list">프로젝트 기록</h2>
-      <button id="clearBtn" class="btn danger" type="button">전체 삭제</button>
+      <div>
+        <h2 id="h-list">프로젝트 기록</h2>
+        <p id="countLine" class="count-line" aria-live="polite"></p>
+      </div>
+      <div class="list-actions">
+        <button id="exportBtn" class="btn ghost sm" type="button">CSV 내보내기</button>
+        <label class="btn ghost sm file-btn">CSV 가져오기<input id="importFile" class="sr-only" type="file" accept=".csv,text/csv"></label>
+        <button id="clearBtn" class="btn danger sm" type="button">전체 삭제</button>
+      </div>
+    </div>
+    <div class="toolbar" role="search">
+      <label class="field grow">검색<input id="search" type="search" placeholder="프로젝트 이름 또는 고객" autocomplete="off"></label>
+      <label class="field">카테고리<select id="fCategory"></select></label>
+      <label class="field">고객<select id="fClient"></select></label>
+      <label class="field">정렬<select id="sort"></select></label>
     </div>
     <div id="list" class="list"></div>
   </section>
-  <footer class="foot">데이터는 이 브라우저에만 저장됩니다.</footer>
+
+  <section class="card" aria-labelledby="h-backup">
+    <h2 id="h-backup">데이터 백업 · 복원</h2>
+    <p class="hint">기록, 템플릿, 월 목표를 JSON 파일 하나로 묶어 저장하고 다시 불러올 수 있어요. 복원하면 현재 데이터가 바뀌니 먼저 백업을 받아 두세요.</p>
+    <div class="list-actions">
+      <button id="backupBtn" class="btn primary sm" type="button">백업 파일 저장</button>
+      <label class="btn ghost sm file-btn">백업 파일 복원<input id="restoreFile" class="sr-only" type="file" accept=".json,application/json"></label>
+    </div>
+  </section>
+
+  <footer class="foot">데이터는 이 브라우저에만 저장됩니다. CSV 열: name, client, category, quotedPrice, estimatedHours, actualHours, date</footer>
 </main>
 
 <div id="modal" class="modal" hidden>
   <div class="backdrop" data-close></div>
-  <form id="form" class="sheet glass-strong" role="dialog" aria-modal="true" aria-labelledby="formTitle" novalidate>
+  <form id="form" class="sheet" role="dialog" aria-modal="true" aria-labelledby="formTitle" novalidate>
     <h2 id="formTitle">프로젝트 추가</h2>
-    <label>프로젝트 이름<input name="name" type="text" maxlength="60" autocomplete="off"><small class="err" data-err="name"></small></label>
-    <label>카테고리<select name="category"></select><small class="err" data-err="category"></small></label>
-    <label>견적 금액 (원)<input name="quotedPrice" type="number" inputmode="numeric" min="1" step="1"><small class="err" data-err="quotedPrice"></small></label>
-    <div class="row2">
-      <label>예상 시간 (h)<input name="estimatedHours" type="number" inputmode="decimal" min="0" step="0.5"><small class="err" data-err="estimatedHours"></small></label>
-      <label>실제 시간 (h)<input name="actualHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="진행 중이면 비움"><small class="err" data-err="actualHours"></small></label>
+    <div id="tplPickWrap" class="tpl-pick">
+      <label class="field">템플릿에서 불러오기<select id="tplPick"></select></label>
     </div>
-    <label>날짜<input name="date" type="date"><small class="err" data-err="date"></small></label>
+    <label class="field">프로젝트 이름<input name="name" type="text" maxlength="60" autocomplete="off"><small class="err" data-err="name"></small></label>
+    <div class="row2">
+      <label class="field">고객 (선택)<input name="client" type="text" maxlength="40" list="clientList" autocomplete="off" placeholder="예: A사"><small class="err" data-err="client"></small></label>
+      <label class="field">카테고리<select name="category"><option value="">선택하세요</option></select><small class="err" data-err="category"></small></label>
+    </div>
+    <label class="field">견적 금액 (원)<input name="quotedPrice" type="number" inputmode="numeric" min="1" step="1"><small class="err" data-err="quotedPrice"></small></label>
+    <div class="row2">
+      <label class="field">예상 시간 (h)<input name="estimatedHours" type="number" inputmode="decimal" min="0" step="0.5"><small class="err" data-err="estimatedHours"></small></label>
+      <label class="field">실제 시간 (h)<input name="actualHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="진행 중이면 비움"><small class="err" data-err="actualHours"></small></label>
+    </div>
+    <label class="field">날짜<input name="date" type="date"><small class="err" data-err="date"></small></label>
+    <datalist id="clientList"></datalist>
     <div class="form-actions">
+      <button id="saveAsTpl" class="btn ghost" type="button">템플릿으로 저장</button>
       <button class="btn ghost" type="button" data-close>취소</button>
       <button class="btn primary" type="submit">저장</button>
     </div>
   </form>
 </div>
-<div id="confirm" class="modal" hidden>
-  <div class="backdrop" data-cclose></div>
-  <div class="sheet glass-strong small" role="alertdialog" aria-modal="true" aria-labelledby="cTitle">
-    <h2 id="cTitle">전체 삭제</h2>
-    <p id="cMsg">모든 기록을 삭제할까요? 되돌릴 수 없습니다.</p>
+
+<div id="tplModal" class="modal" hidden>
+  <div class="backdrop" data-close></div>
+  <form id="tplForm" class="sheet" role="dialog" aria-modal="true" aria-labelledby="tplTitle" novalidate>
+    <h2 id="tplTitle">견적 템플릿 저장</h2>
+    <label class="field">템플릿 이름<input name="name" type="text" maxlength="40" autocomplete="off" placeholder="예: 블로그 원고 10편"><small class="err" data-err="name"></small></label>
+    <div class="row2">
+      <label class="field">고객 (선택)<input name="client" type="text" maxlength="40" autocomplete="off"><small class="err" data-err="client"></small></label>
+      <label class="field">카테고리<select name="category"><option value="">선택하세요</option></select><small class="err" data-err="category"></small></label>
+    </div>
+    <div class="row2">
+      <label class="field">견적 금액 (원)<input name="quotedPrice" type="number" inputmode="numeric" min="1" step="1"><small class="err" data-err="quotedPrice"></small></label>
+      <label class="field">예상 시간 (h)<input name="estimatedHours" type="number" inputmode="decimal" min="0" step="0.5"><small class="err" data-err="estimatedHours"></small></label>
+    </div>
     <div class="form-actions">
-      <button class="btn ghost" type="button" data-cclose>취소</button>
+      <button class="btn ghost" type="button" data-close>취소</button>
+      <button class="btn primary" type="submit">템플릿 저장</button>
+    </div>
+  </form>
+</div>
+
+<div id="chModal" class="modal" hidden>
+  <div class="backdrop" data-close></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="chTitle">
+    <h2 id="chTitle">변경 요청</h2>
+    <p id="chSum" class="hint"></p>
+    <div id="chList" class="ch-list"></div>
+    <form id="chForm" class="ch-form" novalidate>
+      <h3 class="sub-h">변경 요청 추가</h3>
+      <label class="field">변경 내용<input name="note" type="text" maxlength="120" autocomplete="off" placeholder="예: 로고 시안 2개 추가"><small class="err" data-err="note"></small></label>
+      <div class="row2">
+        <label class="field">날짜<input name="date" type="date"><small class="err" data-err="date"></small></label>
+        <label class="field">추가 금액 (원)<input name="costAmount" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><small class="err" data-err="costAmount"></small></label>
+      </div>
+      <label class="field">추가 시간 (h)<input name="costHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="0"><small class="err" data-err="costHours"></small></label>
+      <div class="form-actions">
+        <button class="btn ghost" type="button" data-close>닫기</button>
+        <button class="btn primary" type="submit">요청 추가</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="confirm" class="modal" hidden>
+  <div class="backdrop" data-close></div>
+  <div class="sheet small" role="alertdialog" aria-modal="true" aria-labelledby="cTitle" aria-describedby="cMsg">
+    <h2 id="cTitle">확인</h2>
+    <p id="cMsg"></p>
+    <div class="form-actions">
+      <button id="cCancel" class="btn ghost" type="button" data-close>취소</button>
       <button id="cOk" class="btn danger solid" type="button">삭제</button>
     </div>
   </div>
 </div>
+
 <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
 <script type="module" src="app.js"></script>
 </body>
