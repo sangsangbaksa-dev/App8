@@ -517,3 +517,11 @@ export function importCSV(text) {
   });
   return { records, errors };
 }
+
+// 목표 실질 시급을 맞추려면 얼마를 받아야 하는지. 1,000원 단위로 올림합니다.
+export function priceForTargetRate(hours, targetRate) {
+  const h = Number(hours);
+  const r = Number(targetRate);
+  if (!Number.isFinite(h) || h <= 0 || !Number.isFinite(r) || r <= 0) return null;
+  return Math.ceil((h * r) / 1000) * 1000;
+}

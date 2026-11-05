@@ -1,4 +1,5 @@
 import {
+  priceForTargetRate,
   CATEGORIES, NO_CLIENT, UNSET_LABEL, SORT_MODES, WARN_LIMIT, HOURS_PER_DAY,
   computeStats, categoryBreakdown, breakdownBy, clientList, suggestion, recordSuggestion,
   validateRecord, validateChange, validateTemplate, overrunPct, isFinished, fmtSigned, fmtWon,
@@ -410,12 +411,14 @@ function renderUnit() {
   const step = Number(f('step').value);
   const pct = Number(f('pct').value) || 0;
   const price = f('price').value;
+  const target = f('target').value;
   const rows = [
     [`청구 단위 ${step}시간 기준 올림`, roundHoursUp(h, step), (v) => `${v}시간`],
     [`일 환산 (${HOURS_PER_DAY}시간 기준)`, hoursToDays(h), (v) => `${v}일`],
     [`가산 후 시간 (+${pct}%)`, withSurcharge(h, pct), (v) => `${v}시간`],
     ['시급 환산 (견적 금액 기준)', hourlyRate(price, h), (v) => `${fmtWon(v)}원/시간`],
   ];
+  if (Number(target) > 0) rows.push(['목표 시급 달성 견적가 (1,000원 단위 올림)', priceForTargetRate(h, target), (v) => `${fmtWon(v)}원`]);
   const dl = el('dl', { class: 'kvs' });
   for (const [k, v, fmt] of rows) dl.append(kv(k, v == null ? '-' : fmt(v)));
   out.append(dl);

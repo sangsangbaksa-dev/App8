@@ -7,7 +7,7 @@ import {
   toCSV, parseCSV, importCSV, NO_CLIENT,
   fmtWon, monthlyTotals, validateChange, changeSummary, adjustedQuote, scopeCreepSummary,
   validateTemplate, buildSummaryText, sanitizeRecord, sanitizeTemplate, sanitizeSettings,
-  buildBackup, parseBackup,
+  buildBackup, parseBackup, priceForTargetRate,
 } from '../logic.js';
 
 const rec = (category, est, actual, price = 1000000) => ({ category, estimatedHours: est, actualHours: actual, quotedPrice: price, date: '2026-01-01', name: 'x' });
@@ -338,4 +338,16 @@ test('parseBackup: rejects bad JSON and foreign files', () => {
   assert.equal(parseBackup('{not json').ok, false);
   assert.equal(parseBackup(JSON.stringify({ hello: 1 })).ok, false);
   assert.equal(parseBackup(JSON.stringify({ format: 'estimate-check-backup', records: 'x' })).ok, false);
+});
+
+
+test('priceForTargetRate: 목표 시급 × 시간을 1,000원 단위로 올림', () => {
+  assert.equal(priceForTargetRate(7.2, 100000), 720000);
+  assert.equal(priceForTargetRate(7.3, 100000), 730000);
+  assert.equal(priceForTargetRate(3, 50001), 151000);
+});
+test('priceForTargetRate: 잘못된 입력은 null', () => {
+  assert.equal(priceForTargetRate(0, 100000), null);
+  assert.equal(priceForTargetRate(5, 0), null);
+  assert.equal(priceForTargetRate('abc', 100000), null);
 });
