@@ -348,3 +348,34 @@ a:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:
 @media(prefers-reduced-motion:reduce){
   .site-nav a{transition:none}
 }
+
+/* ---------- direction pass: deep green primary, navy ink, serif display, large radius ---------- */
+:root{
+  --accent:#0B6E4F;--accent-2:#0E8A63;--accent-3:#1D6F8C;--accent-text:#ffffff;
+  --focus:#0B6E4F;--text:#0A1628;--muted:#4B5A6E;--bg:#F8FAFC;--bg-2:#E8EFF5;--surface:#ffffff;--surface-2:#F1F5F9;
+  --hero-1:#0A1628;--hero-2:#0B6E4F;--hero-3:#0C3E5A;--radius:20px;--radius-sm:12px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --accent:#4FCB9B;--accent-2:#7FE0BA;--accent-3:#5FB7D6;--accent-text:#06241A;--focus:#7FE0BA;
+    --text:#E8EEF5;--muted:#9AA9BD;--bg:#0A1628;--bg-2:#10203A;--surface:#11203A;--surface-2:#162948;
+    --hero-1:#06101F;--hero-2:#0B5240;--hero-3:#0C3E5A;--line:#22344F;--line-strong:#2F4566;--input-bg:#0C1A2E;
+  }
+}
+:root[data-theme="dark"]{
+  --accent:#4FCB9B;--accent-2:#7FE0BA;--accent-3:#5FB7D6;--accent-text:#06241A;--focus:#7FE0BA;
+  --text:#E8EEF5;--muted:#9AA9BD;--bg:#0A1628;--bg-2:#10203A;--surface:#11203A;--surface-2:#162948;
+  --hero-1:#06101F;--hero-2:#0B5240;--hero-3:#0C3E5A;--line:#22344F;--line-strong:#2F4566;--input-bg:#0C1A2E;
+}
+h1,h2{font-family:Georgia,"Times New Roman","Noto Serif KR",serif;font-weight:700;letter-spacing:-.01em}
+.btn{border-radius:999px}
+.btn.primary{background:var(--accent);box-shadow:0 6px 16px rgba(11,110,79,.22)}
+.btn.primary:hover{background:#064D36;box-shadow:0 10px 24px rgba(11,110,79,.3)}
+:root:not([data-theme="light"]) .btn.primary:hover,:root[data-theme="dark"] .btn.primary:hover{background:#7FE0BA}
+.stat .v{background:linear-gradient(135deg,var(--accent),var(--accent-3));-webkit-background-clip:text;background-clip:text}
+.card,.stat,.item,.tpl-item,.empty{border-radius:var(--radius)}
+.sticky{background:var(--surface)}
+.sticky-cta{margin-left:auto;min-height:40px}
+.sticky-in{justify-content:flex-start}
+.sticky-in .sticky-cta{margin-left:auto}
+.sticky-in{padding-right:0}
