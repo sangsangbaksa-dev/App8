@@ -6,6 +6,13 @@
 <meta name="color-scheme" content="light dark">
 <title>견적 정확도 체크</title>
 <meta name="description" content="프리랜서를 위한 견적 정확도 체크. 예상 시간과 실제 시간의 차이를 고객별·카테고리별로 분석하고, 범위 변경과 월 목표까지 함께 관리합니다.">
+<meta name="theme-color" content="#5b4bf0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c0e1a" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="견적 정확도 체크">
+<meta property="og:description" content="예상 시간과 실제 시간의 차이를 추적하고, 다음 견적에 얼마나 더해야 할지 알려 드려요.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%235b4bf0'/%3E%3Cpath d='M9 22V10h6.5a4.5 4.5 0 0 1 0 9H9' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M19 22l4-12' stroke='%23ffd36e' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -20,11 +27,17 @@
   </div>
 </div>
 
-<header class="hero">
+<header class="hero" id="top">
   <div class="orb o1" aria-hidden="true"></div><div class="orb o2" aria-hidden="true"></div><div class="orb o3" aria-hidden="true"></div>
   <div class="wrap hero-inner">
     <div class="topbar">
-      <span class="brand">견적 정확도 체크</span>
+      <a class="brand" href="#top" aria-label="견적 정확도 체크 홈"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="9" fill="currentColor" fill-opacity=".22"/><path d="M9 22V10h6.5a4.5 4.5 0 0 1 0 9H9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 22l4-12" stroke="#ffd36e" stroke-width="3" stroke-linecap="round"/></svg><span>견적 정확도 체크</span></a>
+      <nav class="site-nav" aria-label="주요 메뉴">
+        <a href="#dashboard">대시보드</a>
+        <a href="#ai-review">AI 검토</a>
+        <a href="#records">기록</a>
+        <a href="#backup">백업</a>
+      </nav>
       <button id="themeBtn" class="btn glass sm" type="button" aria-pressed="false">다크 모드</button>
     </div>
     <h1>내 견적, 현실과 얼마나 다를까?</h1>
@@ -37,7 +50,7 @@
 </header>
 
 <main id="main" class="wrap">
-  <section aria-labelledby="h-dash">
+  <section id="dashboard" aria-labelledby="h-dash">
     <div class="section-head">
       <h2 id="h-dash">대시보드</h2>
       <button id="copySummary" class="btn ghost sm" type="button">요약 복사</button>
@@ -89,7 +102,7 @@
     </section>
   </div>
 
-  <section class="card ai-card" aria-labelledby="h-ai">
+  <section id="ai-review" class="card ai-card" aria-labelledby="h-ai">
     <div class="section-head">
       <h2 id="h-ai">AI 견적 검토 <span id="aiMode" class="badge">기본 분석</span></h2>
       <button id="aiKeyToggle" class="btn ghost sm" type="button" aria-expanded="false" aria-controls="aiKeyBox">API 키 설정</button>
@@ -128,7 +141,7 @@
     </section>
   </div>
 
-  <section class="card" aria-labelledby="h-list">
+  <section id="records" class="card" aria-labelledby="h-list">
     <div class="list-head">
       <div>
         <h2 id="h-list">프로젝트 기록</h2>
@@ -149,7 +162,7 @@
     <div id="list" class="list"></div>
   </section>
 
-  <section class="card" aria-labelledby="h-backup">
+  <section id="backup" class="card" aria-labelledby="h-backup">
     <h2 id="h-backup">데이터 백업 · 복원</h2>
     <p class="hint">기록, 템플릿, 월 목표를 JSON 파일 하나로 묶어 저장하고 다시 불러올 수 있어요. 복원하면 현재 데이터가 바뀌니 먼저 백업을 받아 두세요.</p>
     <div class="list-actions">
@@ -158,8 +171,20 @@
     </div>
   </section>
 
-  <footer class="foot">데이터는 이 브라우저에만 저장됩니다. CSV 열: name, client, category, quotedPrice, estimatedHours, actualHours, date</footer>
 </main>
+
+<footer class="site-foot">
+  <div class="wrap foot-in">
+    <div class="foot-brand">
+      <span class="brand"><svg class="logo logo-sm" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="9" fill="currentColor" fill-opacity=".22"/><path d="M9 22V10h6.5a4.5 4.5 0 0 1 0 9H9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 22l4-12" stroke="#ffd36e" stroke-width="3" stroke-linecap="round"/></svg><span>견적 정확도 체크</span></span>
+      <p>프리랜서가 예상 시간과 실제 시간의 차이를 줄이도록 돕는 견적 분석 도구입니다.</p>
+    </div>
+    <div class="foot-meta">
+      <p class="privacy">데이터는 이 브라우저에만 저장됩니다. 서버로 전송되지 않으며, 백업 파일은 직접 보관하세요.</p>
+      <p class="copy">&copy; 2026 견적 정확도 체크. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
 
 <div id="modal" class="modal" hidden>
   <div class="backdrop" data-close></div>
