@@ -339,3 +339,35 @@ test('parseBackup: rejects bad JSON and foreign files', () => {
   assert.equal(parseBackup(JSON.stringify({ hello: 1 })).ok, false);
   assert.equal(parseBackup(JSON.stringify({ format: 'estimate-check-backup', records: 'x' })).ok, false);
 });
+
+test('search matches canonically equivalent Korean and full-width text without changing records', () => {
+  const records = [{ ...ok, name: '한글 ＡＰＰ', client: '고객' }];
+  assert.equal(filterRecords(records, { query: '한글'.normalize('NFD') }).length, 1);
+  assert.equal(filterRecords(records, { query: 'app' }).length, 1);
+  assert.equal(records[0].name, '한글 ＡＰＰ');
+});
+
+test('CSV import rejects unclosed quoted fields, duplicate headers and extra columns', () => {
+  const header = 'name,category,quotedPrice,estimatedHours,date';
+  const broken = importCSV(header + '\n"프로젝트,개발,1000,2,2026-01-01');
+  assert.equal(broken.records.length, 0);
+  assert.match(broken.errors[0].message, /따옴표/);
+  assert.equal(importCSV(header + ',name\nA,개발,1000,2,2026-01-01,B').records.length, 0);
+  const excess = importCSV(header + '\nA,개발,1000,2,2026-01-01,unexpected');
+  assert.equal(excess.records.length, 0);
+  assert.match(excess.errors[0].message, /열 개수/);
+});
+
+test('CSV retains BOM, multiline Korean and escaped quotes in valid exports', () => {
+  const record = { ...ok, name: '한글\n"프로젝트"', client: '고객,팀' };
+  const parsed = importCSV('\uFEFF' + toCSV([record]));
+  assert.equal(parsed.errors.length, 0);
+  assert.equal(parsed.records[0].name, record.name);
+  assert.equal(parsed.records[0].client, record.client);
+});
+
+test('backup accepts an optional UTF-8 BOM', () => {
+  const back = parseBackup('\uFEFF' + JSON.stringify([ok]));
+  assert.equal(back.ok, true);
+  assert.equal(back.records.length, 1);
+});

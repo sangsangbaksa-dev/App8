@@ -163,14 +163,15 @@ export function fmtSigned(n) {
 // opts: { query, category, client } — empty values mean "all". client === NO_CLIENT matches untagged records.
 export function filterRecords(records, opts = {}) {
   const list = Array.isArray(records) ? records : [];
-  const q = String(opts.query ?? '').trim().toLowerCase();
+  const searchText = (value) => String(value ?? '').normalize('NFKC').toLowerCase();
+  const q = searchText(opts.query).trim();
   const cat = opts.category || '';
   const cli = opts.client || '';
   return list.filter((r) => {
     if (cat && r.category !== cat) return false;
     if (cli === NO_CLIENT && r.client) return false;
     if (cli && cli !== NO_CLIENT && (r.client || '') !== cli) return false;
-    if (q && !`${r.name} ${r.client || ''}`.toLowerCase().includes(q)) return false;
+    if (q && !searchText(`${r.name} ${r.client || ''}`).includes(q)) return false;
     return true;
   });
 }
@@ -428,7 +429,7 @@ export function buildBackup({ records, templates, settings } = {}, exportedAt = 
 // Accepts a bundle from buildBackup or a plain record array (format v1 export).
 export function parseBackup(text) {
   let data;
-  try { data = JSON.parse(String(text ?? '')); } catch { return { ok: false, error: 'JSON 형식이 올바르지 않아요.' }; }
+  try { data = JSON.parse(String(text ?? '').replace(/^\uFEFF/, '')); } catch { return { ok: false, error: 'JSON 형식이 올바르지 않아요.' }; }
   let recs;
   let tpls = [];
   let settings = {};
@@ -490,21 +491,30 @@ export function parseCSV(text) {
       field += c;
     }
   }
+  if (quoted) throw new SyntaxError('CSV의 닫는 따옴표가 없어요.');
   if (started) { row.push(field); rows.push(row); }
   return rows.filter((r) => !(r.length === 1 && r[0] === ''));
 }
 
 // Returns { records, errors } where records are validated values (no id yet).
 export function importCSV(text) {
-  const rows = parseCSV(text);
+  let rows;
+  try { rows = parseCSV(text); } catch (error) {
+    return { records: [], errors: [{ line: 0, message: error.message }] };
+  }
   if (!rows.length) return { records: [], errors: [{ line: 0, message: '데이터가 없어요.' }] };
   const header = rows[0].map((h) => h.trim());
+  if (new Set(header).size !== header.length) return { records: [], errors: [{ line: 1, message: '중복된 열 이름이 있어요.' }] };
   const missing = CSV_REQUIRED.filter((k) => !header.includes(k));
   if (missing.length) return { records: [], errors: [{ line: 1, message: `필수 열이 없어요: ${missing.join(', ')}` }] };
   const records = [];
   const errors = [];
   rows.slice(1).forEach((cells, idx) => {
     const line = idx + 2;
+    if (cells.length > header.length) {
+      errors.push({ line, message: '열 개수가 머리글보다 많아요. 쉼표가 들어간 값은 따옴표로 감싸 주세요.' });
+      return;
+    }
     const obj = {};
     header.forEach((h, j) => {
       let v = (cells[j] ?? '').trim();
