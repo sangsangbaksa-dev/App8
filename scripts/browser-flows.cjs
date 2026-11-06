@@ -11,8 +11,21 @@ module.exports=async function(page,base){
  await page.reload();assert.equal((await saved())[0].name,'검증 프로젝트 <b>x</b>');
  await page.getByRole('button',{name:'검증 프로젝트 <b>x</b> 복제',exact:true}).click();assert.equal((await saved()).length,2);
  const [file]=await Promise.all([page.waitForEvent('download'),page.click('#backupBtn')]);
+ assert.match(await page.textContent('#backupStatus'), /마지막 전체 백업 다운로드 요청/);
  const fs=require('node:fs');const backup=fs.readFileSync(await file.path(),'utf8');
  assert.equal(JSON.parse(backup).records.length,2);
  await page.setInputFiles('#restoreFile',{name:'backup.json',mimeType:'application/json',buffer:Buffer.from(backup)});await page.click('#cOk');
  assert.equal((await saved()).length,2);assert.equal(new Set((await saved()).map(r=>r.id)).size,2);
+ const damaged='[{bad json]';await page.evaluate(raw=>localStorage.setItem('estimate-check:v1',raw),damaged);await page.reload();
+ assert.equal(await page.locator('#recovery').isVisible(),true);await page.click('#demoBtn');
+ assert.equal(await page.evaluate(()=>localStorage.getItem('estimate-check:v1')),damaged);
+ const [original]=await Promise.all([page.waitForEvent('download'),page.click('#recoveryDownload')]);
+ assert.equal(JSON.parse(require('node:fs').readFileSync(await original.path(),'utf8'))['estimate-check:v1'],damaged);
+ await page.click('#recoveryReset');await page.click('#cOk');await page.waitForFunction(()=>document.querySelector('#recovery').hidden);
+ assert.notEqual(await page.evaluate(()=>localStorage.getItem('estimate-check:v1')),damaged);
+ const records=await saved();records[0].changes=[{bad:'unreadable change'}];const nested=JSON.stringify(records);
+ await page.evaluate(raw=>localStorage.setItem('estimate-check:v1',raw),nested);await page.reload();
+ assert.equal(await page.locator('#recovery').isVisible(),true,'invalid nested changes must trigger recovery');
+ await page.click('#demoBtn');assert.equal(await page.evaluate(()=>localStorage.getItem('estimate-check:v1')),nested,'nested changes must remain in original storage');
+
 };
