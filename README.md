@@ -51,3 +51,7 @@ node --test         # tests/ 자동 탐색
 - `app.js`: DOM 렌더링과 이벤트 처리, localStorage 입출력
 - `index.html`, `styles.css`: 마크업과 디자인 토큰(라이트/다크). 다크 모드에서도 배지와 차트 글자가 읽히도록 색상 토큰을 따로 정의했습니다.
 - `tests/logic.test.js`: `logic.js` 단위 테스트
+
+## 배포 전 검증
+
+설치·빌드·브라우저 검사·Cloudflare 배포 파일 구성은 [PREDEPLOY.md](PREDEPLOY.md)를 참고하세요. `codex/predeploy-2026-11-06` 브랜치의 검증 워크플로에는 배포 단계가 없습니다.
