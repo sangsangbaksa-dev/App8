@@ -6,7 +6,7 @@ import {
   accuracyLevel, filterRecords, sortRecords, normalizeRecord, toCSV, importCSV,
   roundHoursUp, hoursToDays, withSurcharge, hourlyRate,
   monthlyTotals, changeSummary, adjustedQuote, scopeCreepSummary, buildSummaryText,
-  sanitizeRecord, sanitizeTemplate, sanitizeSettings, buildBackup, parseBackup,
+  sanitizeRecord, sanitizeTemplate, sanitizeSettings, buildBackup, parseBackup, repairIds,
 } from './logic.js';
 
 const backupState = backupIndicator(document.getElementById('backupStatus'), 'estimate-check:backup-requested');
@@ -804,14 +804,8 @@ async function restoreFile(file) {
   askConfirm('백업 복원',
     `기록 ${res.records.length}건과 템플릿 ${res.templates.length}건으로 현재 데이터를 바꿀까요? 현재 데이터는 사라집니다.`,
     '복원', () => {
-      const seen = new Set();
-      records = res.records.map((r) => {
-        const id = r.id && !seen.has(r.id) ? r.id : newId();
-        seen.add(id);
-        const changes = r.changes.map((c) => ({ ...c, id: c.id || newId() }));
-        return { ...r, id, changes };
-      });
-      templates = res.templates.map((t) => ({ ...t, id: t.id || newId() }));
+      records = repairIds(res.records, newId).map(r => ({ ...r, changes: repairIds(r.changes, newId) }));
+      templates = repairIds(res.templates, newId);
       settings = res.settings;
       writeJSON(SET_KEY, settings);
       $('#targetInput').value = settings.monthlyTarget || '';
@@ -900,12 +894,14 @@ for (const f of [form, tplForm]) {
     .filter(Boolean)
     .map((r) => (r.id ? r : { ...r, id: newId() }));
   // A malformed nested change can be dropped even when its parent record is valid.
+  records = repairIds(records, newId).map(r => ({ ...r, changes: repairIds(r.changes, newId) }));
   const lostChanges = Array.isArray(raw) && records.length === raw.length && raw.some((r, i) =>
     r.changes != null && (!Array.isArray(r.changes) || r.changes.length !== records[i].changes.length));
   if (!Array.isArray(raw) || records.length !== raw.length || lostChanges) protectRaw(KEY, localStorage.getItem(KEY));
   const tpl = readJSON(TPL_KEY, []);
   templates = (Array.isArray(tpl) ? tpl : []).map(sanitizeTemplate).filter(Boolean)
     .map((t) => (t.id ? t : { ...t, id: newId() }));
+  templates = repairIds(templates, newId);
   if (!Array.isArray(tpl) || templates.length !== tpl.length) protectRaw(TPL_KEY, localStorage.getItem(TPL_KEY));
   settings = sanitizeSettings(readJSON(SET_KEY, {}));
   $('#targetInput').value = settings.monthlyTarget || '';

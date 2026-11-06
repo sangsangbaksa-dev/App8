@@ -7,7 +7,7 @@ import {
   toCSV, parseCSV, importCSV, NO_CLIENT,
   fmtWon, monthlyTotals, validateChange, changeSummary, adjustedQuote, scopeCreepSummary,
   validateTemplate, buildSummaryText, sanitizeRecord, sanitizeTemplate, sanitizeSettings,
-  buildBackup, parseBackup,
+  buildBackup, parseBackup, repairIds,
 } from '../logic.js';
 
 const rec = (category, est, actual, price = 1000000) => ({ category, estimatedHours: est, actualHours: actual, quotedPrice: price, date: '2026-01-01', name: 'x' });
@@ -392,4 +392,14 @@ test('imported numeric fields reject booleans and containers while preserving nu
     assert.equal(sanitizeSettings({monthlyTarget: malformed}).monthlyTarget, 0);
   }
   assert.equal(validateRecord({...ok, actualHours: '2.5'}).valid, true);
+});
+
+
+test('repairIds preserves all rows and avoids future original IDs when fixing collisions', () => {
+  const original = [{id:'a', name:'first'}, {id:'a',name:'second'}, {id:'b',name:'third'}, {id:'',name:'fourth'}];
+  const generated = ['b', 'a', 'c', 'd'];
+  const fixed = repairIds(original, () => generated.shift());
+  assert.deepEqual(fixed.map(r => r.id), ['a','c','b','d']);
+  assert.deepEqual(fixed.map(r => r.name), original.map(r => r.name));
+  assert.equal(original[1].id, 'a');
 });
