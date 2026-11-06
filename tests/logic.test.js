@@ -371,3 +371,10 @@ test('backup accepts an optional UTF-8 BOM', () => {
   assert.equal(back.ok, true);
   assert.equal(back.records.length, 1);
 });
+
+
+test('CSV rejects stray text after a closing quote without changing valid quoted fields', () => {
+  assert.throws(() => parseCSV('"고객"oops,1'), SyntaxError);
+  assert.throws(() => parseCSV('"고객""oops,1'), SyntaxError);
+  assert.deepEqual(parseCSV('"고객"  ,"팀"\r\n"다음",2'), [['고객', '팀'], ['다음', '2']]);
+});

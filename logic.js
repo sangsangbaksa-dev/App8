@@ -470,23 +470,26 @@ export function parseCSV(text) {
   let row = [];
   let field = '';
   let quoted = false;
+  let closedQuote = false;
   let started = false;
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
     started = true;
     if (quoted) {
       if (c === '"') {
-        if (s[i + 1] === '"') { field += '"'; i++; } else quoted = false;
+        if (s[i + 1] === '"') { field += '"'; i++; } else { quoted = false; closedQuote = true; }
       } else field += c;
+    } else if (closedQuote && c !== ',' && c !== '\n' && c !== '\r') {
+      if (c !== ' ' && c !== '\t') throw new SyntaxError('CSV의 닫는 따옴표 뒤에 잘못된 문자가 있어요.');
     } else if (c === '"' && field === '') {
       // Only a quote at the start of a field opens quoted mode; mid-field quotes are literal.
       quoted = true;
     } else if (c === ',') {
-      row.push(field); field = '';
+      row.push(field); field = ''; closedQuote = false;
     } else if (c === '\n' || c === '\r') {
       if (c === '\r' && s[i + 1] === '\n') i++;
       row.push(field); rows.push(row);
-      row = []; field = ''; started = false;
+      row = []; field = ''; started = false; closedQuote = false;
     } else {
       field += c;
     }
