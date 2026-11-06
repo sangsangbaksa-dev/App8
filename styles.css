@@ -299,3 +299,15 @@ input[type="search"]{-webkit-appearance:none;appearance:none}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
+
+/* Backup and recovery use distinct surfaces so their status stays easy to scan. */
+.backup-status{display:flex;align-items:flex-start;gap:10px;margin:0 0 14px;padding:12px 14px;
+  border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--text);font-size:.9rem;line-height:1.55}
+.backup-status::before{content:"";flex:none;width:8px;height:8px;margin-top:.55em;border-radius:50%;background:var(--accent)}
+.recovery{width:calc(100% - 32px);max-width:1048px;margin:16px auto;padding:18px 20px;
+  border:1px solid var(--bad);border-left:5px solid var(--bad);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+.recovery h2{margin:0 0 6px}
+.recovery p{margin:0 0 14px;max-width:70ch}
+.recovery-actions{display:flex;gap:8px;flex-wrap:wrap}
+.recovery:not([hidden])+main{margin-top:16px}
+@media(max-width:480px){.hero-actions .btn,.recovery-actions .btn{flex:1 1 auto}.recovery{padding:16px}}

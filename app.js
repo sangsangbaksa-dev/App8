@@ -1,3 +1,4 @@
+import { backupIndicator } from './backup-status.js';
 import {
   CATEGORIES, NO_CLIENT, UNSET_LABEL, SORT_MODES, WARN_LIMIT, HOURS_PER_DAY,
   computeStats, categoryBreakdown, breakdownBy, clientList, suggestion, recordSuggestion,
@@ -8,6 +9,7 @@ import {
   sanitizeRecord, sanitizeTemplate, sanitizeSettings, buildBackup, parseBackup,
 } from './logic.js';
 
+const backupState = backupIndicator(document.getElementById('backupStatus'), 'estimate-check:backup-requested');
 const KEY = 'estimate-check:v1';
 const THEME_KEY = 'estimate-check:theme';
 const TPL_KEY = 'estimate-check:templates:v1';
@@ -31,15 +33,18 @@ let confirmAction = null;
 const view = { query: '', category: '', client: '', sort: 'date-desc' };
 
 // ---------- storage (each read/write guarded) ----------
+const damagedStorage = new Map();
+function protectRaw(key, raw) { if (raw !== null) damagedStorage.set(key, raw); }
 function readJSON(key, fallback) {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch { return fallback; }
+  let raw = null;
+  try { raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch { protectRaw(key, raw); return fallback; }
 }
 function writeJSON(key, value) {
+  if (damagedStorage.has(key)) return false;
   try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch { return false; }
 }
+
 function persistRecords() {
   if (!writeJSON(KEY, records)) toast('저장소를 사용할 수 없어 새로고침 시 사라져요.');
 }
@@ -788,6 +793,7 @@ async function importCSVFile(file) {
 function backupJSON() {
   const text = JSON.stringify(buildBackup({ records, templates, settings }, new Date().toISOString()), null, 2);
   downloadFile(`estimate-check-backup-${localToday()}.json`, text, 'application/json');
+  if (!damagedStorage.size) backupState.mark();
   toast('백업 파일을 저장했어요.');
 }
 async function restoreFile(file) {
@@ -893,12 +899,31 @@ for (const f of [form, tplForm]) {
     .map((r) => sanitizeRecord(r))
     .filter(Boolean)
     .map((r) => (r.id ? r : { ...r, id: newId() }));
+  // A malformed nested change can be dropped even when its parent record is valid.
+  const lostChanges = Array.isArray(raw) && records.length === raw.length && raw.some((r, i) =>
+    r.changes != null && (!Array.isArray(r.changes) || r.changes.length !== records[i].changes.length));
+  if (!Array.isArray(raw) || records.length !== raw.length || lostChanges) protectRaw(KEY, localStorage.getItem(KEY));
   const tpl = readJSON(TPL_KEY, []);
   templates = (Array.isArray(tpl) ? tpl : []).map(sanitizeTemplate).filter(Boolean)
     .map((t) => (t.id ? t : { ...t, id: newId() }));
+  if (!Array.isArray(tpl) || templates.length !== tpl.length) protectRaw(TPL_KEY, localStorage.getItem(TPL_KEY));
   settings = sanitizeSettings(readJSON(SET_KEY, {}));
   $('#targetInput').value = settings.monthlyTarget || '';
 }
+$('#recovery').hidden = damagedStorage.size === 0;
+$('#recoveryDownload').addEventListener('click', () => {
+  downloadFile('estimate-check-original.json', JSON.stringify(Object.fromEntries(damagedStorage), null, 2), 'application/json');
+});
+$('#recoveryReset').addEventListener('click', () => askConfirm('현재 기록으로 시작', '읽지 못한 원본을 현재 화면의 기록으로 덮어씁니다. 원본을 먼저 내려받았는지 확인하세요.', '시작', () => {
+  const originals = [...damagedStorage.entries()]; damagedStorage.clear();
+  for (const [key, raw] of originals) {
+    const value = key === KEY ? records : key === TPL_KEY ? templates : settings;
+    if (!writeJSON(key, value)) protectRaw(key, raw);
+  }
+  $('#recovery').hidden = damagedStorage.size === 0;
+  if (damagedStorage.size) toast('저장하지 못했어요. 원본을 내려받아 보관하세요.');
+  else toast('현재 기록을 저장했어요.');
+}));
 renderAll();
 renderUnit();
 syncSticky();
