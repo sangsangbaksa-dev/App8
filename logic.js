@@ -1,3 +1,6 @@
+// Numeric form strings are supported; JSON booleans, arrays and objects are not numbers.
+const inputNumber = value => (typeof value === 'number' || (typeof value === 'string' && value.trim() !== '')) ? Number(value) : NaN;
+
 // Pure logic for 견적 정확도 체크 (no DOM).
 export const CATEGORIES = ['디자인', '개발', '영상', '글쓰기', '기타'];
 export const MIN_FINISHED = 3;
@@ -244,9 +247,9 @@ export function validateChange(input) {
   const date = String(i.date ?? '');
   if (!validDate(date)) errors.date = '날짜를 선택하세요.';
   const blankOr = (v) => (v === '' || v === null || v === undefined);
-  const hours = blankOr(i.costHours) ? 0 : Number(i.costHours);
+  const hours = blankOr(i.costHours) ? 0 : inputNumber(i.costHours);
   if (!Number.isFinite(hours) || hours < 0) errors.costHours = '추가 시간은 0 이상의 숫자여야 해요.';
-  const amount = blankOr(i.costAmount) ? 0 : Number(i.costAmount);
+  const amount = blankOr(i.costAmount) ? 0 : inputNumber(i.costAmount);
   if (!Number.isFinite(amount) || amount < 0) errors.costAmount = '추가 금액은 0 이상의 숫자여야 해요.';
   const valid = Object.keys(errors).length === 0;
   return { valid, errors, value: valid ? { note, date, costHours: hours, costAmount: amount } : null };
@@ -299,7 +302,7 @@ export function validateTemplate(input) {
   const client = String(i.client ?? '').trim();
   if (client.length > 40) errors.client = '고객 태그는 40자 이내로 입력하세요.';
   if (!CATEGORIES.includes(i.category)) errors.category = '카테고리를 선택하세요.';
-  const num = (v) => (v === '' || v === null || v === undefined ? NaN : Number(v));
+  const num = inputNumber;
   const price = num(i.quotedPrice);
   if (!Number.isFinite(price) || price <= 0) errors.quotedPrice = '견적 금액은 0보다 큰 숫자여야 해요.';
   const est = num(i.estimatedHours);
@@ -333,7 +336,7 @@ export function validateRecord(input) {
   const client = String(i.client ?? '').trim();
   if (client.length > 40) errors.client = '고객 태그는 40자 이내로 입력하세요.';
   if (!CATEGORIES.includes(i.category)) errors.category = '카테고리를 선택하세요.';
-  const num = (v) => (v === '' || v === null || v === undefined ? NaN : Number(v));
+  const num = inputNumber;
   const price = num(i.quotedPrice);
   if (!Number.isFinite(price) || price <= 0) errors.quotedPrice = '견적 금액은 0보다 큰 숫자여야 해요.';
   const est = num(i.estimatedHours);
@@ -341,7 +344,7 @@ export function validateRecord(input) {
   let actual = null;
   const rawActual = i.actualHours;
   if (!(rawActual === '' || rawActual === null || rawActual === undefined)) {
-    actual = Number(rawActual);
+    actual = inputNumber(rawActual);
     if (!Number.isFinite(actual) || actual <= 0) errors.actualHours = '실제 시간은 0보다 큰 숫자여야 해요 (진행 중이면 비워두세요).';
   }
   const date = String(i.date ?? '');
@@ -411,7 +414,7 @@ export function sanitizeTemplate(t) {
 }
 
 export function sanitizeSettings(s) {
-  const n = Number(s && s.monthlyTarget);
+  const n = inputNumber(s && s.monthlyTarget);
   return { monthlyTarget: Number.isFinite(n) && n > 0 ? Math.round(n) : 0 };
 }
 

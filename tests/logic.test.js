@@ -378,3 +378,18 @@ test('CSV rejects stray text after a closing quote without changing valid quoted
   assert.throws(() => parseCSV('"고객""oops,1'), SyntaxError);
   assert.deepEqual(parseCSV('"고객"  ,"팀"\r\n"다음",2'), [['고객', '팀'], ['다음', '2']]);
 });
+
+
+test('imported numeric fields reject booleans and containers while preserving numeric form strings', () => {
+  for (const malformed of [true, false, [100], {value: 100}]) {
+    for (const field of ['quotedPrice', 'estimatedHours', 'actualHours']) {
+      assert.ok(validateRecord({...ok, [field]: malformed}).errors[field]);
+      assert.equal(sanitizeRecord({...ok, [field]: malformed}), null);
+    }
+    assert.ok(validateTemplate({...ok, quotedPrice: malformed}).errors.quotedPrice);
+    assert.ok(validateChange({note: 'extra', date: ok.date, costHours: malformed}).errors.costHours);
+    assert.ok(validateChange({note: 'extra', date: ok.date, costAmount: malformed}).errors.costAmount);
+    assert.equal(sanitizeSettings({monthlyTarget: malformed}).monthlyTarget, 0);
+  }
+  assert.equal(validateRecord({...ok, actualHours: '2.5'}).valid, true);
+});
