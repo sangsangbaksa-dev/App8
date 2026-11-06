@@ -533,3 +533,17 @@ export function importCSV(text) {
   });
   return { records, errors };
 }
+
+
+/** Repair colliding IDs without dropping rows or changing unrelated original IDs. */
+export function repairIds(items, createId) {
+  const reserved = new Set(items.map(item => item.id).filter(Boolean));
+  const seen = new Set();
+  return items.map(item => {
+    if (item.id && !seen.has(item.id)) { seen.add(item.id); return item; }
+    let id;
+    do { id = createId(); } while (!id || reserved.has(id) || seen.has(id));
+    seen.add(id);
+    return { ...item, id };
+  });
+}

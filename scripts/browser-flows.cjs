@@ -16,6 +16,11 @@ module.exports=async function(page,base){
  assert.equal(JSON.parse(backup).records.length,2);
  await page.setInputFiles('#restoreFile',{name:'backup.json',mimeType:'application/json',buffer:Buffer.from(backup)});await page.click('#cOk');
  assert.equal((await saved()).length,2);assert.equal(new Set((await saved()).map(r=>r.id)).size,2);
+ const duplicates=JSON.parse(backup).records.map((r,i)=>({...r,id:'same-id',name:i?'두번째':'첫번째'}));
+ await page.evaluate(rows=>localStorage.setItem('estimate-check:v1',JSON.stringify(rows)),duplicates);await page.reload();
+ await page.getByRole('button',{name:'첫번째 삭제',exact:true}).click();await page.click('#cOk');
+ assert.equal((await saved()).length,1,'deleting one colliding ID must not delete another record');
+ assert.equal((await saved())[0].name,'두번째');
  const damaged='[{bad json]';await page.evaluate(raw=>localStorage.setItem('estimate-check:v1',raw),damaged);await page.reload();
  assert.equal(await page.locator('#recovery').isVisible(),true);await page.click('#demoBtn');
  assert.equal(await page.evaluate(()=>localStorage.getItem('estimate-check:v1')),damaged);
