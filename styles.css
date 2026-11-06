@@ -311,3 +311,9 @@ input[type="search"]{-webkit-appearance:none;appearance:none}
 .recovery-actions{display:flex;gap:8px;flex-wrap:wrap}
 .recovery:not([hidden])+main{margin-top:16px}
 @media(max-width:480px){.hero-actions .btn,.recovery-actions .btn{flex:1 1 auto}.recovery{padding:16px}}
+
+/* Keep search controls visually together without competing with project data. */
+.toolbar{padding:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:14px}
+.toolbar input,.toolbar select{background:var(--surface)}
+.toolbar .field:focus-within{color:var(--accent)}
+@media(max-width:480px){.toolbar{gap:12px;padding:12px}.toolbar .field{flex-basis:calc(50% - 6px)}.toolbar .field.grow{flex-basis:100%}}
