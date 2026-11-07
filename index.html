@@ -4,65 +4,64 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>견적 정확도 체크</title>
-<meta name="description" content="프리랜서를 위한 견적 정확도 체크. 예상 시간과 실제 시간의 차이를 고객별·카테고리별로 분석하고, 범위 변경과 월 목표까지 함께 관리합니다.">
-<meta name="theme-color" content="#0B6E4F" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#06101F" media="(prefers-color-scheme: dark)">
-<meta property="og:type" content="website">
-<meta property="og:title" content="견적 정확도 체크">
-<meta property="og:description" content="예상 시간과 실제 시간의 차이를 추적하고, 다음 견적에 얼마나 더해야 할지 알려 드려요.">
-<meta property="og:locale" content="ko_KR">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230B6E4F'/%3E%3Cpath d='M9 22V10h6.5a4.5 4.5 0 0 1 0 9H9' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M19 22l4-12' stroke='%23ffd36e' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<title data-i18n="docTitle">견적 정확도 체크</title>
+<meta name="description" content="프리랜서를 위한 견적 정확도 체크. 예상 시간과 실제 시간의 차이를 고객별·카테고리별로 분석합니다." data-i18n-attr="content=metaDesc">
+<meta name="theme-color" content="#1F5C4A" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101412" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231F5C4A'/%3E%3Cpath d='M9 22V10h6.5a4.5 4.5 0 0 1 0 9H9' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<a class="skip" href="#main">본문으로 건너뛰기</a>
+<a class="skip" href="#main" data-i18n="skipLink">본문으로 건너뛰기</a>
 
 <div id="sticky" class="sticky" aria-hidden="true">
   <div class="wrap sticky-in">
-    <span>프로젝트 <b id="stCount">-</b></span>
-    <span>적중률 <b id="stHit">-</b></span>
-    <span>평균 편차 <b id="stAvg">-</b></span>
-    <span>실질 시급 <b id="stRate">-</b></span>
-    <button class="btn primary sm sticky-cta" type="button" onclick="document.getElementById('addBtn').click()">+ 프로젝트 추가</button>
+    <span><span data-i18n="stickyProjects">프로젝트</span> <b id="stCount">-</b></span>
+    <span><span data-i18n="stickyHit">적중률</span> <b id="stHit">-</b></span>
+    <span><span data-i18n="stickyAvg">평균 편차</span> <b id="stAvg">-</b></span>
+    <span><span data-i18n="stickyRate">실질 시급</span> <b id="stRate">-</b></span>
+    <button class="btn primary sm" type="button" data-i18n="addProject" onclick="document.getElementById('addBtn').click()">프로젝트 추가</button>
   </div>
 </div>
 
 <header class="hero" id="top">
   <div class="wrap">
     <div class="topbar">
-      <a class="brand" href="#top" aria-label="견적 정확도 체크 홈"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="9" fill="currentColor" fill-opacity=".18"/><path d="M9 22V10h6.5a4.5 4.5 0 0 1 0 9H9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 22l4-12" stroke="#7FE0BA" stroke-width="3" stroke-linecap="round"/></svg><span>견적 정확도 체크</span></a>
-      <nav class="site-nav" aria-label="주요 메뉴">
-        <a href="#dashboard">대시보드</a>
-        <a href="#compare">비교</a>
-        <a href="#ai-review">AI 검토</a>
-        <a href="#records">기록</a>
-        <a href="#backup">백업</a>
+      <a class="brand" href="#top" data-i18n-attr="aria-label=homeAria"><span class="logo" aria-hidden="true"></span><span data-i18n="siteName">견적 정확도 체크</span></a>
+      <nav class="site-nav" aria-label="주요 메뉴" data-i18n-attr="aria-label=menuLabel">
+        <a href="#dashboard" data-i18n="navDash">대시보드</a>
+        <a href="#compare" data-i18n="navCompare">비교</a>
+        <a href="#ai-review" data-i18n="navAi">AI 검토</a>
+        <a href="#records" data-i18n="navRecords">기록</a>
+        <a href="#backup" data-i18n="navBackup">백업</a>
       </nav>
-      <button id="themeBtn" class="btn glass sm" type="button" aria-pressed="false">다크 모드</button>
+      <div class="top-tools">
+        <label class="lang-field"><span class="sr-only" data-i18n="langLabel">언어</span><select id="langSelect" aria-label="언어"></select></label>
+        <button id="themeBtn" class="btn ghost sm" type="button" aria-pressed="false" data-i18n="themeDark">다크 모드</button>
+      </div>
     </div>
     <div class="hero-grid">
       <div class="hero-copy">
-        <h1>내 견적, 현실과 얼마나 다를까?</h1>
-        <p class="lead">예상 시간과 실제 시간의 차이를 추적하고, 고객과 카테고리별로 다음 견적에 얼마나 더해야 할지 확인하세요.</p>
+        <h1 data-i18n="heroTitle">견적마다 실제 시간이 얼마나 늘어나는지 기록으로 확인하세요</h1>
+        <p class="lead" data-i18n="heroLead">프로젝트마다 예상 시간과 실제 시간을 적어 두면, 카테고리와 고객별로 다음 견적에 얼마나 시간을 더해야 할지 보여 드려요.</p>
         <div class="hero-actions">
-          <button id="addBtn" class="btn primary" type="button">+ 프로젝트 추가</button>
-          <button id="demoBtn" class="btn glass" type="button">예시 데이터 불러오기</button>
+          <button id="addBtn" class="btn primary" type="button" data-i18n="addProject">+ 프로젝트 추가</button>
+          <button id="demoBtn" class="btn link" type="button" data-i18n="heroDemo">예시 데이터로 둘러보기</button>
         </div>
       </div>
       <figure class="mock" aria-hidden="true">
-        <div class="mock-top"><b>이번 달 정확도</b><small>예시 화면</small></div>
+        <div class="mock-top"><b data-i18n="mockTitle">이번 달 정확도</b><small data-i18n="mockSample">예시 화면</small></div>
         <div class="mock-stats">
-          <div><small>적중률 ±10%</small><strong>72%</strong></div>
-          <div><small>평균 편차</small><strong>+8%</strong></div>
-          <div><small>실질 시급</small><strong>91,000원</strong></div>
+          <div><small data-i18n="mockHit">적중률 ±10%</small><strong>72%</strong></div>
+          <div><small data-i18n="mockAvg">평균 편차</small><strong>+8%</strong></div>
+          <div><small data-i18n="mockRate">실질 시급</small><strong data-i18n="mockRateVal">91,000원</strong></div>
         </div>
         <div class="mock-rows">
-          <div class="mock-row"><span>디자인</span><span class="mock-track"><i style="--w:38%;--c:#7FE0BA"></i></span><em>+3%</em></div>
-          <div class="mock-row"><span>개발</span><span class="mock-track"><i style="--w:72%;--c:#FFAE6B"></i></span><em>+18%</em></div>
-          <div class="mock-row"><span>글쓰기</span><span class="mock-track"><i style="--w:12%;--c:#5FB7D6"></i></span><em>-2%</em></div>
+          <div class="mock-row"><span data-i18n="catDesign">디자인</span><span class="mock-track"><i style="--w:38%"></i></span><em>+3%</em></div>
+          <div class="mock-row"><span data-i18n="catDev">개발</span><span class="mock-track"><i class="over" style="--w:72%"></i></span><em>+18%</em></div>
+          <div class="mock-row"><span data-i18n="catWriting">글쓰기</span><span class="mock-track"><i style="--w:12%"></i></span><em>-2%</em></div>
         </div>
-        <p class="mock-tip">개발 프로젝트는 시간을 15% 더 잡으면 실제와 가까워져요.</p>
+        <p class="mock-tip" data-i18n="mockTip">개발 프로젝트는 시간을 15% 더 잡으면 실제와 가까워져요.</p>
       </figure>
     </div>
   </div>
@@ -71,8 +70,8 @@
 <main id="main" class="wrap">
   <section id="dashboard" aria-labelledby="h-dash">
     <div class="section-head">
-      <h2 id="h-dash">대시보드</h2>
-      <div class="list-actions"><button id="copySummary" class="btn ghost sm" type="button">요약 복사</button><button id="printBtn" class="btn ghost sm" type="button">인쇄용 보기</button></div>
+      <h2 id="h-dash" data-i18n="hDash">대시보드</h2>
+      <div class="list-actions"><button id="copySummary" class="btn ghost sm" type="button" data-i18n="copySummary">요약 복사</button><button id="printBtn" class="btn ghost sm" type="button" data-i18n="printView">인쇄용 보기</button></div>
     </div>
     <div class="grid stats" id="stats"></div>
   </section>
@@ -81,76 +80,71 @@
 
   <div class="two">
     <section class="card" aria-labelledby="h-cat">
-      <h2 id="h-cat">카테고리별 평균 편차</h2>
+      <h2 id="h-cat" data-i18n="catVarTitle">카테고리별 평균 편차</h2>
       <div id="catBars" class="bars"></div>
     </section>
     <section class="card" aria-labelledby="h-client">
-      <h2 id="h-client">고객별 평균 편차</h2>
+      <h2 id="h-client" data-i18n="clientVarTitle">고객별 평균 편차</h2>
       <div id="clientBars" class="bars"></div>
     </section>
   </div>
 
   <div class="two">
     <section class="card" aria-labelledby="h-trend">
-      <h2 id="h-trend">예상 vs 실제 시간 추이</h2>
+      <h2 id="h-trend" data-i18n="trendTitle">예상 vs 실제 시간 추이</h2>
       <div id="trend" class="trend"></div>
-      <h3 class="sub-h">프로젝트별 편차율</h3>
+      <h3 class="sub-h" data-i18n="varBarsTitle">프로젝트별 편차율</h3>
       <div id="varChart" class="trend"></div>
       <div class="chart-head">
-        <h3 class="sub-h">월별 견적 금액 · 목표선</h3>
-        <label class="field target-field">월 목표 (원)<input id="targetInput" type="number" inputmode="numeric" min="0" step="100000" placeholder="예: 3000000"></label>
+        <h3 class="sub-h" data-i18n="monthTitle">월별 견적 금액 · 목표선</h3>
+        <label class="field target-field"><span data-i18n="targetLabel">월 목표 (원)</span><input id="targetInput" type="number" inputmode="numeric" min="0" step="100000" data-i18n-attr="placeholder=targetPh" placeholder="예: 3000000"></label>
       </div>
       <div id="monthChart" class="trend"></div>
     </section>
     <section class="card" aria-labelledby="h-unit">
-      <h2 id="h-unit">단위·반올림 도우미</h2>
-      <p class="hint">작업 시간을 청구 단위로 올리고, 일 단위와 시급을 바로 환산해요.</p>
+      <h2 id="h-unit" data-i18n="unitTitle">단위·반올림 도우미</h2>
+      <p class="hint" data-i18n="unitHint">작업 시간을 청구 단위로 올리고, 일 단위와 시급을 바로 환산해요.</p>
       <form id="unitForm" class="unit-form" autocomplete="off">
-        <label class="field">작업 시간 (h)<input name="hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="예: 7.2"></label>
-        <label class="field">청구 단위<select name="step">
-          <option value="0.5">0.5시간</option>
-          <option value="1" selected>1시간</option>
-          <option value="2">2시간</option>
-          <option value="4">4시간</option>
-        </select></label>
-        <label class="field">가산율 (%)<input name="pct" type="number" inputmode="decimal" min="0" step="5" value="10"></label>
-        <label class="field">견적 금액 (원, 선택)<input name="price" type="number" inputmode="numeric" min="0" step="1" placeholder="시급 환산용"></label>
-        <label class="field">목표 시급 (원, 선택)<input name="target" type="number" inputmode="numeric" min="0" step="1000" placeholder="예: 100000"></label>
+        <label class="field"><span data-i18n="unitHours">작업 시간 (h)</span><input name="hours" type="number" inputmode="decimal" min="0" step="0.25" data-i18n-attr="placeholder=unitHoursPh" placeholder="예: 7.2"></label>
+        <label class="field"><span data-i18n="unitBill">청구 단위</span><select name="step" id="unitStep"></select></label>
+        <label class="field"><span data-i18n="unitPct">가산율 (%)</span><input name="pct" type="number" inputmode="decimal" min="0" step="5" value="10"></label>
+        <label class="field"><span data-i18n="unitPrice">견적 금액 (원, 선택)</span><input name="price" type="number" inputmode="numeric" min="0" step="1" data-i18n-attr="placeholder=unitPricePh" placeholder="시급 환산용"></label>
+        <label class="field"><span data-i18n="unitTarget">목표 시급 (원, 선택)</span><input name="target" type="number" inputmode="numeric" min="0" step="1000" data-i18n-attr="placeholder=unitTargetPh" placeholder="예: 100000"></label>
       </form>
       <div id="unitOut" class="unit-out" aria-live="polite"></div>
     </section>
   </div>
 
   <section id="compare" class="card" aria-labelledby="h-cmp">
-    <h2 id="h-cmp">프로젝트 비교</h2>
-    <p class="hint">두 프로젝트를 골라 견적, 시간, 편차, 실질 시급을 나란히 봅니다. 차이는 B에서 A를 뺀 값이에요.</p>
+    <h2 id="h-cmp" data-i18n="cmpTitle">프로젝트 비교</h2>
+    <p class="hint" data-i18n="cmpHint">두 프로젝트를 골라 견적, 시간, 편차, 실질 시급을 나란히 봅니다. 차이는 B에서 A를 뺀 값이에요.</p>
     <div class="row2">
-      <label class="field">프로젝트 A<select id="cmpA"></select></label>
-      <label class="field">프로젝트 B<select id="cmpB"></select></label>
+      <label class="field"><span data-i18n="cmpA">프로젝트 A</span><select id="cmpA"></select></label>
+      <label class="field"><span data-i18n="cmpB">프로젝트 B</span><select id="cmpB"></select></label>
     </div>
     <div id="cmpOut" class="cmp-out" aria-live="polite"></div>
   </section>
 
   <section id="ai-review" class="card ai-card" aria-labelledby="h-ai">
     <div class="section-head">
-      <h2 id="h-ai">AI 견적 검토 <span id="aiMode" class="badge">기본 분석</span></h2>
-      <button id="aiKeyToggle" class="btn ghost sm" type="button" aria-expanded="false" aria-controls="aiKeyBox">API 키 설정</button>
+      <h2 id="h-ai"><span data-i18n="aiTitle">AI 견적 검토</span> <span id="aiMode" class="badge" data-i18n="aiModeBasic">기본 분석</span></h2>
+      <button id="aiKeyToggle" class="btn ghost sm" type="button" aria-expanded="false" aria-controls="aiKeyBox" data-i18n="aiKeySet">API 키 설정</button>
     </div>
-    <p class="hint">견적 항목을 한 줄에 하나씩 적으면 위험한 항목과 빠진 항목을 찾아 드려요. 형식은 <code>항목 | 예상 시간(h) | 금액(원, 선택)</code>입니다. 고객 이름은 보내지 않아요.</p>
+    <p class="hint" data-i18n="aiHint">견적 항목을 한 줄에 하나씩 적으면 위험한 항목과 빠진 항목을 찾아 드려요. 고객 이름은 보내지 않아요.</p>
     <div id="aiKeyBox" class="ai-key" hidden>
-      <label class="field">Anthropic API 키<input id="aiKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..."></label>
-      <p class="hint">키는 이 브라우저의 localStorage에만 저장되고, 분석할 때 api.anthropic.com으로만 전송돼요. 공용 컴퓨터에서는 저장하지 마세요. 키가 없으면 기본 검토를 보여 줘요.</p>
+      <label class="field"><span data-i18n="aiKeyLabel">Anthropic API 키</span><input id="aiKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-..."></label>
+      <p class="hint" data-i18n="aiKeyNote">키는 이 브라우저의 localStorage에만 저장되고, 분석할 때 api.anthropic.com으로만 전송돼요. 공용 컴퓨터에서는 저장하지 마세요. 키가 없으면 기본 검토를 보여 줘요.</p>
       <div class="list-actions">
-        <button id="aiKeySave" class="btn primary sm" type="button">키 저장</button>
-        <button id="aiKeyClear" class="btn ghost sm" type="button">키 삭제</button>
+        <button id="aiKeySave" class="btn primary sm" type="button" data-i18n="aiKeySave">키 저장</button>
+        <button id="aiKeyClear" class="btn ghost sm" type="button" data-i18n="aiKeyDel">키 삭제</button>
       </div>
     </div>
     <form id="aiForm" class="ai-form" autocomplete="off">
-      <label class="field">견적 카테고리<select id="aiCategory" name="category"></select></label>
-      <label class="field">견적 항목<textarea id="aiItems" name="items" rows="6" maxlength="3000" placeholder="로고 시안 3종 | 6 | 300000&#10;수정 2회 | 3&#10;납품 파일 정리 | 1"></textarea></label>
+      <label class="field"><span data-i18n="aiCategory">견적 카테고리</span><select id="aiCategory" name="category"></select></label>
+      <label class="field"><span data-i18n="aiItems">견적 항목</span><textarea id="aiItems" name="items" rows="6" maxlength="3000" data-i18n-attr="placeholder=aiItemsPh" placeholder="로고 시안 3종 | 6 | 300000&#10;수정 2회 | 3&#10;납품 파일 정리 | 1"></textarea></label>
       <div class="form-actions">
-        <button id="aiExample" class="btn ghost" type="button">예시 넣기</button>
-        <button id="aiRun" class="btn primary" type="submit">분석하기</button>
+        <button id="aiExample" class="btn ghost" type="button" data-i18n="aiExample">예시 넣기</button>
+        <button id="aiRun" class="btn primary" type="submit" data-i18n="aiRun">분석하기</button>
       </div>
     </form>
     <div id="aiOut" class="ai-out" aria-live="polite"></div>
@@ -159,13 +153,13 @@
   <div class="two">
     <section class="card" aria-labelledby="h-tpl">
       <div class="section-head">
-        <h2 id="h-tpl">견적 템플릿</h2>
-        <button id="tplAddBtn" class="btn ghost sm" type="button">+ 템플릿</button>
+        <h2 id="h-tpl" data-i18n="tplTitle">견적 템플릿</h2>
+        <button id="tplAddBtn" class="btn ghost sm" type="button" data-i18n="tplAdd">+ 템플릿</button>
       </div>
       <div id="tplList" class="tpl-list"></div>
     </section>
     <section class="card" aria-labelledby="h-scope">
-      <h2 id="h-scope">범위 변경 요약</h2>
+      <h2 id="h-scope" data-i18n="scopeTitle">범위 변경 요약</h2>
       <div id="scopeBox"></div>
     </section>
   </div>
@@ -173,44 +167,44 @@
   <section id="records" class="card" aria-labelledby="h-list">
     <div class="list-head">
       <div>
-        <h2 id="h-list">프로젝트 기록</h2>
+        <h2 id="h-list" data-i18n="recTitle">프로젝트 기록</h2>
         <p id="countLine" class="count-line" aria-live="polite"></p>
       </div>
       <div class="list-actions">
-        <button id="exportBtn" class="btn ghost sm" type="button">CSV 내보내기</button>
-        <label class="btn ghost sm file-btn">CSV 가져오기<input id="importFile" class="sr-only" type="file" accept=".csv,text/csv"></label>
-        <button id="clearBtn" class="btn danger sm" type="button">전체 삭제</button>
+        <button id="exportBtn" class="btn ghost sm" type="button" data-i18n="csvExport">CSV 내보내기</button>
+        <label class="btn ghost sm file-btn"><span data-i18n="csvImport">CSV 가져오기</span><input id="importFile" class="sr-only" type="file" accept=".csv,text/csv"></label>
+        <button id="clearBtn" class="btn danger sm" type="button" data-i18n="clearAll">전체 삭제</button>
       </div>
     </div>
     <div class="toolbar" role="search">
-      <label class="field grow">검색<input id="search" type="search" placeholder="프로젝트 이름 또는 고객" autocomplete="off"></label>
-      <label class="field">카테고리<select id="fCategory"></select></label>
-      <label class="field">고객<select id="fClient"></select></label>
-      <label class="field">정렬<select id="sort"></select></label>
+      <label class="field grow"><span data-i18n="searchLabel">검색</span><input id="search" type="search" data-i18n-attr="placeholder=searchPh" placeholder="프로젝트 이름 또는 고객" autocomplete="off"></label>
+      <label class="field"><span data-i18n="filterCategory">카테고리</span><select id="fCategory"></select></label>
+      <label class="field"><span data-i18n="filterClient">고객</span><select id="fClient"></select></label>
+      <label class="field"><span data-i18n="sortLabel">정렬</span><select id="sort"></select></label>
     </div>
     <div id="list" class="list"></div>
   </section>
 
   <section id="backup" class="card" aria-labelledby="h-backup">
-    <h2 id="h-backup">데이터 백업 · 복원</h2>
-    <p class="hint">기록, 템플릿, 월 목표를 JSON 파일 하나로 묶어 저장하고 다시 불러올 수 있어요. 복원하면 현재 데이터가 바뀌니 먼저 백업을 받아 두세요.</p>
+    <h2 id="h-backup" data-i18n="backupTitle">데이터 백업 · 복원</h2>
+    <p class="hint" data-i18n="backupHint">기록, 템플릿, 월 목표를 JSON 파일 하나로 묶어 저장하고 다시 불러올 수 있어요. 복원하면 현재 데이터가 바뀌니 먼저 백업을 받아 두세요.</p>
     <div class="list-actions">
-      <button id="backupBtn" class="btn primary sm" type="button">백업 파일 저장</button>
-      <label class="btn ghost sm file-btn">백업 파일 복원<input id="restoreFile" class="sr-only" type="file" accept=".json,application/json"></label>
+      <button id="backupBtn" class="btn primary sm" type="button" data-i18n="backupSave">백업 파일 저장</button>
+      <label class="btn ghost sm file-btn"><span data-i18n="backupRestore">백업 파일 복원</span><input id="restoreFile" class="sr-only" type="file" accept=".json,application/json"></label>
     </div>
   </section>
-
 </main>
 
 <footer class="site-foot">
   <div class="wrap foot-in">
     <div class="foot-brand">
-      <span class="brand"><svg class="logo logo-sm" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="9" fill="currentColor" fill-opacity=".22"/><path d="M9 22V10h6.5a4.5 4.5 0 0 1 0 9H9" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 22l4-12" stroke="#ffd36e" stroke-width="3" stroke-linecap="round"/></svg><span>견적 정확도 체크</span></span>
-      <p>프리랜서가 예상 시간과 실제 시간의 차이를 줄이도록 돕는 견적 분석 도구입니다.</p>
+      <span class="brand"><span class="logo" aria-hidden="true"></span><span data-i18n="siteName">견적 정확도 체크</span></span>
+      <p data-i18n="footerDesc">프리랜서가 예상 시간과 실제 시간의 차이를 줄이도록 돕는 견적 분석 도구입니다.</p>
+      <p class="disclaimer" data-i18n="footerDisclaimer">참고용 추정 자료입니다. 세무, 법률, 재무 자문이 아닙니다.</p>
     </div>
     <div class="foot-meta">
-      <p class="privacy">데이터는 이 브라우저에만 저장됩니다. 서버로 전송되지 않으며, 백업 파일은 직접 보관하세요.</p>
-      <p class="copy">&copy; 2026 견적 정확도 체크. All rights reserved.</p>
+      <p class="privacy" data-i18n="footerPrivacy">데이터는 이 브라우저에만 저장됩니다. 서버로 전송되지 않으며, 백업 파일은 직접 보관하세요.</p>
+      <p class="copy" data-i18n="footerCopy">&copy; 2026 견적 정확도 체크</p>
     </div>
   </div>
 </footer>
@@ -218,46 +212,46 @@
 <div id="modal" class="modal" hidden>
   <div class="backdrop" data-close></div>
   <form id="form" class="sheet" role="dialog" aria-modal="true" aria-labelledby="formTitle" novalidate>
-    <h2 id="formTitle">프로젝트 추가</h2>
+    <h2 id="formTitle" data-i18n="formAdd">프로젝트 추가</h2>
     <div id="tplPickWrap" class="tpl-pick">
-      <label class="field">템플릿에서 불러오기<select id="tplPick"></select></label>
+      <label class="field"><span data-i18n="tplPickLabel">템플릿에서 불러오기</span><select id="tplPick"></select></label>
     </div>
-    <label class="field">프로젝트 이름<input name="name" type="text" maxlength="60" autocomplete="off"><small class="err" data-err="name"></small></label>
+    <label class="field"><span data-i18n="fName">프로젝트 이름</span><input name="name" type="text" maxlength="60" autocomplete="off"><small class="err" data-err="name"></small></label>
     <div class="row2">
-      <label class="field">고객 (선택)<input name="client" type="text" maxlength="40" list="clientList" autocomplete="off" placeholder="예: A사"><small class="err" data-err="client"></small></label>
-      <label class="field">카테고리<select name="category"><option value="">선택하세요</option></select><small class="err" data-err="category"></small></label>
+      <label class="field"><span data-i18n="fClient">고객 (선택)</span><input name="client" type="text" maxlength="40" list="clientList" autocomplete="off" data-i18n-attr="placeholder=fClientPh" placeholder="예: A사"><small class="err" data-err="client"></small></label>
+      <label class="field"><span data-i18n="fCategory">카테고리</span><select name="category"></select><small class="err" data-err="category"></small></label>
     </div>
-    <label class="field">견적 금액 (원)<input name="quotedPrice" type="number" inputmode="numeric" min="1" step="1"><small class="err" data-err="quotedPrice"></small></label>
+    <label class="field"><span data-i18n="fQuote">견적 금액 (원)</span><input name="quotedPrice" type="number" inputmode="numeric" min="1" step="1"><small class="err" data-err="quotedPrice"></small></label>
     <div class="row2">
-      <label class="field">예상 시간 (h)<input name="estimatedHours" type="number" inputmode="decimal" min="0" step="0.5"><small class="err" data-err="estimatedHours"></small></label>
-      <label class="field">실제 시간 (h)<input name="actualHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="진행 중이면 비움"><small class="err" data-err="actualHours"></small></label>
+      <label class="field"><span data-i18n="fEst">예상 시간 (h)</span><input name="estimatedHours" type="number" inputmode="decimal" min="0" step="0.5"><small class="err" data-err="estimatedHours"></small></label>
+      <label class="field"><span data-i18n="fActual">실제 시간 (h)</span><input name="actualHours" type="number" inputmode="decimal" min="0" step="0.5" data-i18n-attr="placeholder=fActualPh" placeholder="진행 중이면 비움"><small class="err" data-err="actualHours"></small></label>
     </div>
-    <label class="field">날짜<input name="date" type="date"><small class="err" data-err="date"></small></label>
+    <label class="field"><span data-i18n="fDate">날짜</span><input name="date" type="date"><small class="err" data-err="date"></small></label>
     <datalist id="clientList"></datalist>
     <div class="form-actions">
-      <button id="saveAsTpl" class="btn ghost" type="button">템플릿으로 저장</button>
-      <button class="btn ghost" type="button" data-close>취소</button>
-      <button class="btn primary" type="submit">저장</button>
+      <button id="saveAsTpl" class="btn ghost" type="button" data-i18n="saveAsTpl">템플릿으로 저장</button>
+      <button class="btn ghost" type="button" data-close data-i18n="cancel">취소</button>
+      <button class="btn primary" type="submit" data-i18n="save">저장</button>
     </div>
   </form>
 </div>
 
 <div id="tplModal" class="modal" hidden>
   <div class="backdrop" data-close></div>
-  <form id="tplForm" class="sheet" role="dialog" aria-modal="true" aria-labelledby="tplTitle" novalidate>
-    <h2 id="tplTitle">견적 템플릿 저장</h2>
-    <label class="field">템플릿 이름<input name="name" type="text" maxlength="40" autocomplete="off" placeholder="예: 블로그 원고 10편"><small class="err" data-err="name"></small></label>
+  <form id="tplForm" class="sheet" role="dialog" aria-modal="true" aria-labelledby="tplTitleH" novalidate>
+    <h2 id="tplTitleH" data-i18n="tplSaveTitle">견적 템플릿 저장</h2>
+    <label class="field"><span data-i18n="tplName">템플릿 이름</span><input name="name" type="text" maxlength="40" autocomplete="off" data-i18n-attr="placeholder=tplNamePh" placeholder="예: 블로그 원고 10편"><small class="err" data-err="name"></small></label>
     <div class="row2">
-      <label class="field">고객 (선택)<input name="client" type="text" maxlength="40" autocomplete="off"><small class="err" data-err="client"></small></label>
-      <label class="field">카테고리<select name="category"><option value="">선택하세요</option></select><small class="err" data-err="category"></small></label>
+      <label class="field"><span data-i18n="fClientOpt">고객 (선택)</span><input name="client" type="text" maxlength="40" autocomplete="off"><small class="err" data-err="client"></small></label>
+      <label class="field"><span data-i18n="fCategory">카테고리</span><select name="category"></select><small class="err" data-err="category"></small></label>
     </div>
     <div class="row2">
-      <label class="field">견적 금액 (원)<input name="quotedPrice" type="number" inputmode="numeric" min="1" step="1"><small class="err" data-err="quotedPrice"></small></label>
-      <label class="field">예상 시간 (h)<input name="estimatedHours" type="number" inputmode="decimal" min="0" step="0.5"><small class="err" data-err="estimatedHours"></small></label>
+      <label class="field"><span data-i18n="fQuote">견적 금액 (원)</span><input name="quotedPrice" type="number" inputmode="numeric" min="1" step="1"><small class="err" data-err="quotedPrice"></small></label>
+      <label class="field"><span data-i18n="fEst">예상 시간 (h)</span><input name="estimatedHours" type="number" inputmode="decimal" min="0" step="0.5"><small class="err" data-err="estimatedHours"></small></label>
     </div>
     <div class="form-actions">
-      <button class="btn ghost" type="button" data-close>취소</button>
-      <button class="btn primary" type="submit">템플릿 저장</button>
+      <button class="btn ghost" type="button" data-close data-i18n="cancel">취소</button>
+      <button class="btn primary" type="submit" data-i18n="tplSave">템플릿 저장</button>
     </div>
   </form>
 </div>
@@ -265,20 +259,20 @@
 <div id="chModal" class="modal" hidden>
   <div class="backdrop" data-close></div>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="chTitle">
-    <h2 id="chTitle">변경 요청</h2>
+    <h2 id="chTitle" data-i18n="chTitleBase">변경 요청</h2>
     <p id="chSum" class="hint"></p>
     <div id="chList" class="ch-list"></div>
     <form id="chForm" class="ch-form" novalidate>
-      <h3 class="sub-h">변경 요청 추가</h3>
-      <label class="field">변경 내용<input name="note" type="text" maxlength="120" autocomplete="off" placeholder="예: 로고 시안 2개 추가"><small class="err" data-err="note"></small></label>
+      <h3 class="sub-h" data-i18n="chAddTitle">변경 요청 추가</h3>
+      <label class="field"><span data-i18n="chNote">변경 내용</span><input name="note" type="text" maxlength="120" autocomplete="off" data-i18n-attr="placeholder=chNotePh" placeholder="예: 로고 시안 2개 추가"><small class="err" data-err="note"></small></label>
       <div class="row2">
-        <label class="field">날짜<input name="date" type="date"><small class="err" data-err="date"></small></label>
-        <label class="field">추가 금액 (원)<input name="costAmount" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><small class="err" data-err="costAmount"></small></label>
+        <label class="field"><span data-i18n="fDate">날짜</span><input name="date" type="date"><small class="err" data-err="date"></small></label>
+        <label class="field"><span data-i18n="chAmount">추가 금액 (원)</span><input name="costAmount" type="number" inputmode="numeric" min="0" step="1" placeholder="0"><small class="err" data-err="costAmount"></small></label>
       </div>
-      <label class="field">추가 시간 (h)<input name="costHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="0"><small class="err" data-err="costHours"></small></label>
+      <label class="field"><span data-i18n="chHours">추가 시간 (h)</span><input name="costHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="0"><small class="err" data-err="costHours"></small></label>
       <div class="form-actions">
-        <button class="btn ghost" type="button" data-close>닫기</button>
-        <button class="btn primary" type="submit">요청 추가</button>
+        <button class="btn ghost" type="button" data-close data-i18n="close">닫기</button>
+        <button class="btn primary" type="submit" data-i18n="chAdd">요청 추가</button>
       </div>
     </form>
   </div>
@@ -287,11 +281,11 @@
 <div id="confirm" class="modal" hidden>
   <div class="backdrop" data-close></div>
   <div class="sheet small" role="alertdialog" aria-modal="true" aria-labelledby="cTitle" aria-describedby="cMsg">
-    <h2 id="cTitle">확인</h2>
+    <h2 id="cTitle" data-i18n="confirmTitle">확인</h2>
     <p id="cMsg"></p>
     <div class="form-actions">
-      <button id="cCancel" class="btn ghost" type="button" data-close>취소</button>
-      <button id="cOk" class="btn danger solid" type="button">삭제</button>
+      <button id="cCancel" class="btn ghost" type="button" data-close data-i18n="cancel">취소</button>
+      <button id="cOk" class="btn danger solid" type="button" data-i18n="deleteBtn">삭제</button>
     </div>
   </div>
 </div>
