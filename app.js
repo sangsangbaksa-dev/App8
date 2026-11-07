@@ -5,6 +5,7 @@ import {
   validateRecord, validateChange, validateTemplate, overrunPct, isFinished, fmtSigned, fmtWon,
   accuracyLevel, filterRecords, sortRecords, normalizeRecord, toCSV, importCSV,
   roundHoursUp, hoursToDays, withSurcharge, hourlyRate,
+  compareProjects, buildPrintReport,
   monthlyTotals, changeSummary, adjustedQuote, scopeCreepSummary, buildSummaryText,
   sanitizeRecord, sanitizeTemplate, sanitizeSettings, buildBackup, parseBackup,
   AI_KEY_STORAGE, AI_MAX_ITEMS, isPlausibleKey, parseLineItems, buildReviewPrompt, buildAnthropicRequest,
@@ -397,6 +398,8 @@ function renderAll() {
   renderScope();
   renderFilters();
   renderList();
+  renderCompareSelects();
+  renderCompare();
 }
 
 // ---------- render: unit helper ----------
@@ -820,6 +823,95 @@ async function restoreFile(file) {
       toast(`복원했어요.${res.skipped ? ` (잘못된 기록 ${res.skipped}건 제외)` : ''}`);
     });
 }
+// ---------- comparison ----------
+const CMP_SEL = { a: '#cmpA', b: '#cmpB' };
+function fillCompareSelect(sel, prevId, fallbackIndex) {
+  const list = sortRecords(records, 'date-desc');
+  sel.replaceChildren(...list.map((r) => el('option', { value: r.id, text: `${r.name} (${r.date || '날짜 없음'})` })));
+  const hasPrev = list.some((r) => r.id === prevId);
+  if (hasPrev) sel.value = prevId;
+  else if (list[fallbackIndex]) sel.value = list[fallbackIndex].id;
+}
+function renderCompareSelects() {
+  const a = $(CMP_SEL.a), b = $(CMP_SEL.b);
+  const prevA = a.value, prevB = b.value;
+  fillCompareSelect(a, prevA, 0);
+  fillCompareSelect(b, prevB, 1);
+  a.disabled = b.disabled = records.length < 2;
+}
+function fmtCmpValue(unit, v) {
+  if (v == null) return '-';
+  if (unit === 'won') return fmtWon(v) + '원';
+  if (unit === 'hours') return v + 'h';
+  if (unit === 'pct') return fmtSigned(v) + '%';
+  return String(v);
+}
+function fmtCmpDiff(unit, d) {
+  if (d == null) return '-';
+  if (unit === 'won') return (d > 0 ? '+' : '') + fmtWon(d) + '원';
+  if (unit === 'hours') return fmtSigned(d) + 'h';
+  if (unit === 'pct') return fmtSigned(d) + '%p';
+  return String(d);
+}
+function renderCompare() {
+  const out = $('#cmpOut');
+  if (records.length < 2) {
+    out.replaceChildren(el('p', { class: 'hint', text: '프로젝트가 2건 이상이면 두 개를 골라 비교할 수 있어요.' }));
+    return;
+  }
+  const a = records.find((r) => r.id === $(CMP_SEL.a).value);
+  const b = records.find((r) => r.id === $(CMP_SEL.b).value);
+  const c = compareProjects(a, b);
+  if (!c) {
+    out.replaceChildren(el('p', { class: 'hint', text: '서로 다른 프로젝트를 고르면 차이가 보여요.' }));
+    return;
+  }
+  const rows = c.rows.map((r) => el('tr', {},
+    el('th', { scope: 'row', text: r.label }),
+    el('td', { class: 'num', text: fmtCmpValue(r.unit, r.left) }),
+    el('td', { class: 'num', text: fmtCmpValue(r.unit, r.right) }),
+    el('td', { class: 'num diff', text: fmtCmpDiff(r.unit, r.diff) })));
+  rows.push(el('tr', {},
+    el('th', { scope: 'row', text: '정확도' }),
+    el('td', { text: c.leftLevel }),
+    el('td', { text: c.rightLevel }),
+    el('td', { text: '-' })));
+  out.replaceChildren(
+    el('div', { class: 'cmp-wrap', role: 'region', 'aria-label': '프로젝트 비교 표', tabindex: '0' },
+      el('table', { class: 'cmp' },
+        el('caption', { class: 'sr-only', text: `${c.left.name}과 ${c.right.name} 비교` }),
+        el('thead', {}, el('tr', {},
+          el('th', { scope: 'col', text: '지표' }),
+          el('th', { scope: 'col', text: `A: ${c.left.name}` }),
+          el('th', { scope: 'col', text: `B: ${c.right.name}` }),
+          el('th', { scope: 'col', text: '차이 (B−A)' }))),
+        el('tbody', {}, ...rows))));
+}
+
+// ---------- printable report ----------
+function printReport() {
+  const r = buildPrintReport(records, localToday());
+  const area = $('#printArea');
+  const stats = el('dl', { class: 'print-stats' }, ...r.stats.map((s) =>
+    el('div', {}, el('dt', { text: s.label }), el('dd', { text: s.value }))));
+  const head = el('tr', {}, ...['프로젝트', '고객', '카테고리', '날짜', '견적', '예상', '실제', '편차', '정확도']
+    .map((t) => el('th', { scope: 'col', text: t })));
+  const body = r.rows.map((x) => el('tr', {},
+    el('td', { text: x.name }), el('td', { text: x.client }), el('td', { text: x.category }),
+    el('td', { text: x.date }), el('td', { class: 'num', text: x.quoted }), el('td', { class: 'num', text: x.estimated }),
+    el('td', { class: 'num', text: x.actual }), el('td', { class: 'num', text: x.overrun }), el('td', { text: x.level })));
+  area.replaceChildren(
+    el('h1', { text: r.title }),
+    el('p', { text: r.date ? `기준일 ${r.date}` : '' }),
+    stats,
+    el('p', { text: `제안: ${r.suggestion}` }),
+    r.empty
+      ? el('p', { text: '저장된 프로젝트가 없어요.' })
+      : el('table', { class: 'print-table' }, el('thead', {}, head), el('tbody', {}, ...body)),
+    el('p', { class: 'print-note', text: r.note }));
+  window.print();
+}
+
 async function copySummary() {
   const ok = await copyText(buildSummaryText(records, localToday()));
   toast(ok ? '요약을 클립보드에 복사했어요.' : '복사하지 못했어요. 브라우저 설정을 확인해 주세요.');
@@ -828,6 +920,9 @@ async function copySummary() {
 $('#demoBtn').addEventListener('click', loadDemo);
 $('#addBtn').addEventListener('click', () => openForm());
 $('#copySummary').addEventListener('click', copySummary);
+$('#printBtn').addEventListener('click', printReport);
+$(CMP_SEL.a).addEventListener('change', renderCompare);
+$(CMP_SEL.b).addEventListener('change', renderCompare);
 $('#exportBtn').addEventListener('click', exportCSV);
 $('#importFile').addEventListener('change', (e) => {
   const file = e.target.files && e.target.files[0];

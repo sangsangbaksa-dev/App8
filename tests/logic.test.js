@@ -485,3 +485,72 @@ test('isPlausibleKey and aiErrorMessage', () => {
   assert.match(aiErrorMessage(429), /한도/);
   assert.match(aiErrorMessage(503), /서버/);
 });
+
+// ---- comparison view and printable report ----
+import { compareProjects, buildPrintReport, LEVEL_TEXT, REPORT_NOTE } from '../logic.js';
+
+const pa = { id: 'a', name: 'A 로고', client: 'A사', category: '디자인', quotedPrice: 1000000, estimatedHours: 10, actualHours: 12, date: '2026-01-10', changes: [] };
+const pb = { id: 'b', name: 'B 블로그', client: '', category: '글쓰기', quotedPrice: 600000, estimatedHours: 8, actualHours: 8, date: '2026-02-03', changes: [{ note: 'x', date: '2026-02-05', costAmount: 100000, costHours: 1 }] };
+
+test('compareProjects: returns null for missing or identical records', () => {
+  assert.equal(compareProjects(null, pb), null);
+  assert.equal(compareProjects(pa, undefined), null);
+  assert.equal(compareProjects(pa, { ...pa }), null);
+});
+test('compareProjects: diffs are right minus left', () => {
+  const c = compareProjects(pa, pb);
+  const row = (k) => c.rows.find((r) => r.key === k);
+  assert.equal(row('quotedPrice').diff, -400000);
+  assert.equal(row('estimatedHours').diff, -2);
+  assert.equal(row('actualHours').diff, -4);
+  assert.equal(row('overrun').left, 20);
+  assert.equal(row('overrun').right, 0);
+  assert.equal(row('overrun').diff, -20);
+  assert.equal(row('rate').left, Math.round(1000000 / 12));
+  assert.equal(row('rate').right, 75000);
+});
+test('compareProjects: adjusted quote includes scope changes', () => {
+  const c = compareProjects(pa, pb);
+  const adj = c.rows.find((r) => r.key === 'adjusted');
+  assert.equal(adj.left, 1000000);
+  assert.equal(adj.right, 700000);
+  assert.equal(adj.diff, -300000);
+});
+test('compareProjects: unfinished side gives null diffs and pending level', () => {
+  const open = { ...pa, id: 'c', actualHours: undefined };
+  const c = compareProjects(pa, open);
+  assert.equal(c.right.level, 'pending');
+  assert.equal(c.rightLevel, LEVEL_TEXT.pending);
+  assert.equal(c.rows.find((r) => r.key === 'overrun').diff, null);
+  assert.equal(c.rows.find((r) => r.key === 'rate').right, null);
+});
+test('buildPrintReport: empty list has no rows and keeps the note', () => {
+  const r = buildPrintReport([], '2026-03-01');
+  assert.equal(r.empty, true);
+  assert.equal(r.rows.length, 0);
+  assert.equal(r.date, '2026-03-01');
+  assert.equal(r.note, REPORT_NOTE);
+  assert.equal(r.stats[0].value, '0건 (완료 0건)');
+});
+test('buildPrintReport: rows are newest first and formatted as text', () => {
+  const r = buildPrintReport([pa, pb], '2026-03-01');
+  assert.equal(r.empty, false);
+  assert.deepEqual(r.rows.map((x) => x.name), ['B 블로그', 'A 로고']);
+  const a = r.rows[1];
+  assert.equal(a.quoted, '1,000,000원');
+  assert.equal(a.estimated, '10h');
+  assert.equal(a.actual, '12h');
+  assert.equal(a.overrun, '+20%');
+  assert.equal(a.level, LEVEL_TEXT.warn);
+  assert.equal(r.rows[0].client, '미지정');
+});
+test('buildPrintReport: unset client and unfinished rows are labelled', () => {
+  const open = { id: 'z', name: '진행 중', category: '개발', quotedPrice: 1, estimatedHours: 2, date: '2026-03-02' };
+  const r = buildPrintReport([open], '');
+  assert.equal(r.rows[0].client, '미지정');
+  assert.equal(r.rows[0].actual, '-');
+  assert.equal(r.rows[0].overrun, '진행 중');
+});
+test('buildPrintReport: non-array input is treated as empty', () => {
+  assert.equal(buildPrintReport(undefined).empty, true);
+});

@@ -724,3 +724,76 @@ export function localReview({ items = [], category = '', records = [] } = {}) {
     hoursAdjustmentPct: pct,
   };
 }
+
+// Comparison and printable report ----------------------------------------------
+export const LEVEL_TEXT = { good: '좋음 (±10% 이내)', warn: '주의 (±25% 이내)', bad: '크게 벗어남', pending: '진행 중' };
+export const REPORT_NOTE = '참고용 추정 자료입니다. 세무·법률·재무 자문이 아닙니다.';
+
+// Side-by-side numbers for two records. Returns null if a record is missing or both ids match.
+// diff = right - left, or null when either side has no value (e.g. an unfinished project).
+export function compareProjects(a, b) {
+  if (!a || !b || !a.id || !b.id || a.id === b.id) return null;
+  const pick = (r) => {
+    const pct = overrunPct(r);
+    return {
+      name: String(r.name ?? ''),
+      quotedPrice: Number(r.quotedPrice) || 0,
+      adjusted: adjustedQuote(r),
+      estimatedHours: Number(r.estimatedHours) || 0,
+      actualHours: isFinished(r) ? r.actualHours : null,
+      overrun: pct === null ? null : round1(pct),
+      rate: isFinished(r) ? hourlyRate(r.quotedPrice, r.actualHours) : null,
+      level: accuracyLevel(pct),
+    };
+  };
+  const left = pick(a), right = pick(b);
+  const diffOf = (key) => (left[key] == null || right[key] == null ? null : round1(right[key] - left[key]));
+  const specs = [
+    { key: 'quotedPrice', label: '견적 금액', unit: 'won' },
+    { key: 'adjusted', label: '조정 견적 (변경 포함)', unit: 'won' },
+    { key: 'estimatedHours', label: '예상 시간', unit: 'hours' },
+    { key: 'actualHours', label: '실제 시간', unit: 'hours' },
+    { key: 'overrun', label: '편차율', unit: 'pct' },
+    { key: 'rate', label: '실질 시급', unit: 'won' },
+  ];
+  const rows = specs.map((s) => ({ ...s, left: left[s.key], right: right[s.key], diff: diffOf(s.key) }));
+  return { left, right, rows, leftLevel: LEVEL_TEXT[left.level], rightLevel: LEVEL_TEXT[right.level] };
+}
+
+// Plain-data report for printing: every value is already formatted text, so the view only places it.
+export function buildPrintReport(records, today = '') {
+  const list = Array.isArray(records) ? records : [];
+  const s = computeStats(list);
+  const sc = scopeCreepSummary(list);
+  const rows = sortRecords(list, 'date-desc').map((r) => {
+    const pct = overrunPct(r);
+    const level = accuracyLevel(pct);
+    return {
+      name: String(r.name ?? ''),
+      client: r.client ? String(r.client) : UNSET_LABEL,
+      category: String(r.category ?? ''),
+      date: String(r.date ?? ''),
+      quoted: fmtWon(r.quotedPrice) + '원',
+      estimated: `${Number(r.estimatedHours) || 0}h`,
+      actual: isFinished(r) ? `${r.actualHours}h` : '-',
+      overrun: pct === null ? '진행 중' : fmtSigned(round1(pct)) + '%',
+      level: LEVEL_TEXT[level],
+    };
+  });
+  return {
+    title: '견적 정확도 리포트',
+    date: today,
+    stats: [
+      { label: '프로젝트', value: `${s.count}건 (완료 ${s.finishedCount}건)` },
+      { label: '총 견적 금액', value: fmtWon(s.totalQuoted) + '원' },
+      { label: '실질 시급', value: s.effectiveRate == null ? '-' : fmtWon(s.effectiveRate) + '원/시간' },
+      { label: '적중률 (±10%)', value: s.hitRate == null ? '-' : Math.round(s.hitRate) + '%' },
+      { label: '평균 편차율', value: s.avgOverrun == null ? '-' : fmtSigned(s.avgOverrun) + '%' },
+      { label: '범위 변경', value: `${sc.count}건, 추가 ${fmtWon(sc.amount)}원` },
+    ],
+    suggestion: suggestion(list).message,
+    rows,
+    empty: rows.length === 0,
+    note: REPORT_NOTE,
+  };
+}
